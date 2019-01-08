@@ -19,9 +19,11 @@ GU"><meta name="keywords"><meta content="width=device-width, initial-scale=1.0, 
 <li>类别C：EventLoop轮询处理线程</li>
 <li>类别D：其他线程，有 定时器触发线程 (setTimeout)、http 异步线程、浏览器事件线程 (onclick)等等。</li>
 </ul>
+<p><br/></p>
 <h4 id="类别B"><a href="#类别B" class="headerlink" title="类别B:"></a>类别B:</h4><p>JS主线程,主要运行一些非异步的代码<br><figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> a=<span class="number">1</span>;</span><br><span class="line"><span class="built_in">console</span>.log(a)</span><br><span class="line"></span><br><span class="line">setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line"> <span class="built_in">console</span>.log(<span class="number">2</span>)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></p>
 <p>其中:<br><figure class="highlight abnf"><table><tr><td class="code"><pre><span class="line">var a =<span class="number">1</span><span class="comment">;</span></span><br><span class="line">console.log(a)<span class="comment">;</span></span><br></pre></td></tr></table></figure></p>
 <p>都是运行在JS主线程之中</p>
+<p><br/></p>
 <h4 id="类别D"><a href="#类别D" class="headerlink" title="类别D"></a>类别D</h4><p>JS代码中，碰到异步代码，就被放入相对应的线程中去执行,例如</p>
 <figure class="highlight basic"><table><tr><td class="code"><pre><span class="line"><span class="symbol">1 </span>var a = <span class="number">2</span>;</span><br><span class="line"><span class="symbol">2 </span>setTimeout(fun A)</span><br><span class="line"><span class="symbol">3 </span>ajax(fun B)</span><br><span class="line"><span class="symbol">4 </span>console.<span class="keyword">log</span>()</span><br><span class="line"><span class="symbol">5 </span>dom.onclick(func C)</span><br></pre></td></tr></table></figure>
 <p>主线程在运行这段代码时，碰到2 setTimeout(fun A)，把这行代码交给定时器触发线程去执行<br>碰到3 ajax(fun B)，把这行代码交给http 异步线程去执行<br>碰到5 dom.onclick(func C) ，把这行代码交给浏览器事件线程去执行<br>注意： 这几个异步代码的回调函数fun A，fun B，fun C，各自的线程都会保存着的，因为需要在未来执行啊。。。<br>所以，这几个线程主要干两件事：</p>
@@ -29,12 +31,14 @@ GU"><meta name="keywords"><meta content="width=device-width, initial-scale=1.0, 
 <li>执行主线程扔过来的异步代码，并执行代码</li>
 <li>保存着回调函数，异步代码执行成功后，通知EventLoop轮询处理线程过来取相应的回调函数</li>
 </ul>
+<p><br/></p>
 <h4 id="消息队列（任务队列）"><a href="#消息队列（任务队列）" class="headerlink" title="消息队列（任务队列）"></a>消息队列（任务队列）</h4><p>可以理解为一个静态的队列存储结构，非线程，只做存储，里面存的是一堆异步成功后的回调函数,为根据实际执行的顺序依次仍进队列中</p>
 <p>注意：</p>
 <ol>
 <li>是异步成功后，才把其回调函数扔进队列中，而不是一开始就把所有异步的回调函数扔进队列。比如setTimeout 3秒后执行一个函数，那么这个函数是在3秒后才进队列的。</li>
 <li>当两个执行结果同时要进入列队时,这里就牵扯到了微任务和宏任务的说法,我们会在一会针对微任务和宏任务特别说明</li>
 </ol>
+<p><br/></p>
 <h4 id="类别C"><a href="#类别C" class="headerlink" title="类别C"></a>类别C</h4><p>EventLoop轮询处理线程</p>
 <p>上面我们已经知道了，有3个东西</p>
 <ol>
@@ -44,6 +48,7 @@ GU"><meta name="keywords"><meta content="width=device-width, initial-scale=1.0, 
 </ol>
 <p>在一开始，消息队列是空的,当我们拿到回调函数后,会依次按照顺序存储在消息列队里,但是我们的JS主线程,异步线程和消息列队是不能直接联系的,这里就需要一个中间介质EventLoop来与他们三个沟通</p>
 <p>￼从主线程那里顺时针看,整个的流程是循环往复的<br><img src="/images/pasted-2.png" alt="upload successful"></p>
+<p><br/><br/></p>
 <h4 id="微任务、宏任务"><a href="#微任务、宏任务" class="headerlink" title="微任务、宏任务"></a>微任务、宏任务</h4><p>再从我们的所有异步线程执行后的回调函数进入消息列队的时候,如果不同时间触发,那么会按照时间顺序依次进入,假如在同一时刻,不同的回调函数进入,这时就会出现先后顺序,而这里始终遵循的原则:<strong>先微任务,后宏任务</strong></p>
 <figure class="highlight coffeescript"><table><tr><td class="code"><pre><span class="line">setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> <span class="built_in">console</span>.log(<span class="number">4</span>))</span><br><span class="line"></span><br><span class="line"><span class="keyword">new</span> Promise(resolve =&gt; &#123;</span><br><span class="line">  resolve()</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="number">1</span>)</span><br><span class="line">&#125;).<span class="keyword">then</span>(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="number">3</span>)</span><br><span class="line">  Promise.resolve().<span class="keyword">then</span>(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'before timeout'</span>)</span><br><span class="line">  &#125;).<span class="keyword">then</span>(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    Promise.resolve().<span class="keyword">then</span>(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="built_in">console</span>.log(<span class="string">'also before timeout'</span>)</span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="number">2</span>)</span><br></pre></td></tr></table></figure>
 <p>结果<br><figure class="highlight applescript"><table><tr><td class="code"><pre><span class="line"><span class="number">1</span></span><br><span class="line"><span class="number">2</span></span><br><span class="line"><span class="number">3</span></span><br><span class="line"><span class="keyword">before</span> <span class="keyword">timeout</span></span><br><span class="line">also <span class="keyword">before</span> <span class="keyword">timeout</span></span><br><span class="line"><span class="number">4</span></span><br></pre></td></tr></table></figure></p>
@@ -83,6 +88,7 @@ GU"><meta name="keywords"><meta content="width=device-width, initial-scale=1.0, 
 </tr>
 </tbody>
 </table>
+<p><br/></p>
 <h4 id="微任务"><a href="#微任务" class="headerlink" title="微任务"></a>微任务</h4><table>
 <thead>
 <tr>
@@ -109,4 +115,4 @@ GU"><meta name="keywords"><meta content="width=device-width, initial-scale=1.0, 
 </tr>
 </tbody>
 </table>
-</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-01-08</span><i class="fa fa-tag"></i><a class="tag" href="/tags/JavaScript/" title="JavaScript">JavaScript </a></div></div></div></div><div class="pagination"><ul class="clearfix"><li class="next pagbuttons"><a class="btn" role="navigation" href="/2018/12/21/NGXS总结/" title="Ngxs异步处理总结">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script></body></html>
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-01-08</span><i class="fa fa-tag"></i><a class="tag" href="/tags/JavaScript/" title="JavaScript">JavaScript </a></div></div></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a class="btn" role="navigation" href="/2019/01/08/1/" title="Ionic3使用InAppBrowser进行数据交互">上一篇</a></li><li class="next pagbuttons"><a class="btn" role="navigation" href="/2018/12/21/NGXS总结/" title="Ngxs异步处理总结">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script></body></html>
