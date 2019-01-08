@@ -1,0 +1,112 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="Mccc"><title>JS线程详解 · Mccc</title><meta name="description" content="一直以来对于JS线程中很多概念总是模糊的概念,很多人会把JS线程的概念和微任务、宏任务分开来理解,其实本身他们就是一件完整的事情.JS一直以来是单线程运行,所以在实际环境中,由于settimeout,DOM的一些操作事件,异步都会有单独的线程来辅助JS线程的运行
+其中浏览器有很多线程，例如：
+
+GU"><meta name="keywords"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo@2x.png" style="width:127px;border-radius: 50%;border: 1px solid #ddd;padding: 4px;"><h3 title=""><a href="/">Mccc</a></h3></div></div><ul class="social-links"><li><a href="mailto:249749871@qq.com/" target="_blank"><i class="fa fa-envelope-o"></i></a></li><li><a href="https://github.com/angelise7" target="_blank"><i class="fa fa-github"></i></a></li></ul><div class="footer"><span>©Copyright 2018</span></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/archives">归档</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div><div class="avatar"><img src="/images/logo.png"></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>JS线程详解</a></h3></div><div class="post-content"><p>一直以来对于JS线程中很多概念总是模糊的概念,很多人会把JS线程的概念和微任务、宏任务分开来理解,其实本身他们就是一件完整的事情.<br>JS一直以来是单线程运行,所以在实际环境中,由于settimeout,DOM的一些操作事件,异步都会有单独的线程来辅助JS线程的运行</p>
+<p>其中浏览器有很多线程，例如：</p>
+<ol>
+<li>GUI 渲染线程</li>
+<li>JS 引擎线程</li>
+<li>定时器触发线程 (setTimeout)</li>
+<li>浏览器事件线程 (onclick)</li>
+<li>http 异步线程</li>
+<li>EventLoop轮询处理线程</li>
+</ol>
+<p>其中1、2、4为常驻线程</p>
+<p>一个进程的运行，当然需要很多个线程互相配合,当然一个网页能够正常的运行并和用户交互，也需要很多个进程之间相互配合，而其主要的一些线程，刚才在上面已经列出来了，分类：</p>
+<ul>
+<li>类别A：GUI 渲染线程</li>
+<li>类别B：JS 引擎线程</li>
+<li>类别C：EventLoop轮询处理线程</li>
+<li>类别D：其他线程，有 定时器触发线程 (setTimeout)、http 异步线程、浏览器事件线程 (onclick)等等。</li>
+</ul>
+<h4 id="类别B"><a href="#类别B" class="headerlink" title="类别B:"></a>类别B:</h4><p>JS主线程,主要运行一些非异步的代码<br><figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> a=<span class="number">1</span>;</span><br><span class="line"><span class="built_in">console</span>.log(a)</span><br><span class="line"></span><br><span class="line">setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line"> <span class="built_in">console</span>.log(<span class="number">2</span>)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>其中:<br><figure class="highlight abnf"><table><tr><td class="code"><pre><span class="line">var a =<span class="number">1</span><span class="comment">;</span></span><br><span class="line">console.log(a)<span class="comment">;</span></span><br></pre></td></tr></table></figure></p>
+<p>都是运行在JS主线程之中</p>
+<h4 id="类别D"><a href="#类别D" class="headerlink" title="类别D"></a>类别D</h4><p>JS代码中，碰到异步代码，就被放入相对应的线程中去执行,例如</p>
+<figure class="highlight basic"><table><tr><td class="code"><pre><span class="line"><span class="symbol">1 </span>var a = <span class="number">2</span>;</span><br><span class="line"><span class="symbol">2 </span>setTimeout(fun A)</span><br><span class="line"><span class="symbol">3 </span>ajax(fun B)</span><br><span class="line"><span class="symbol">4 </span>console.<span class="keyword">log</span>()</span><br><span class="line"><span class="symbol">5 </span>dom.onclick(func C)</span><br></pre></td></tr></table></figure>
+<p>主线程在运行这段代码时，碰到2 setTimeout(fun A)，把这行代码交给定时器触发线程去执行<br>碰到3 ajax(fun B)，把这行代码交给http 异步线程去执行<br>碰到5 dom.onclick(func C) ，把这行代码交给浏览器事件线程去执行<br>注意： 这几个异步代码的回调函数fun A，fun B，fun C，各自的线程都会保存着的，因为需要在未来执行啊。。。<br>所以，这几个线程主要干两件事：</p>
+<ul>
+<li>执行主线程扔过来的异步代码，并执行代码</li>
+<li>保存着回调函数，异步代码执行成功后，通知EventLoop轮询处理线程过来取相应的回调函数</li>
+</ul>
+<h4 id="消息队列（任务队列）"><a href="#消息队列（任务队列）" class="headerlink" title="消息队列（任务队列）"></a>消息队列（任务队列）</h4><p>可以理解为一个静态的队列存储结构，非线程，只做存储，里面存的是一堆异步成功后的回调函数,为根据实际执行的顺序依次仍进队列中</p>
+<p>注意：</p>
+<ol>
+<li>是异步成功后，才把其回调函数扔进队列中，而不是一开始就把所有异步的回调函数扔进队列。比如setTimeout 3秒后执行一个函数，那么这个函数是在3秒后才进队列的。</li>
+<li>当两个执行结果同时要进入列队时,这里就牵扯到了微任务和宏任务的说法,我们会在一会针对微任务和宏任务特别说明</li>
+</ol>
+<h4 id="类别C"><a href="#类别C" class="headerlink" title="类别C"></a>类别C</h4><p>EventLoop轮询处理线程</p>
+<p>上面我们已经知道了，有3个东西</p>
+<ol>
+<li>主线程，处理同步代码</li>
+<li>类别D的线程，处理异步代码</li>
+<li>消息队列，存储着异步成功后的回调函数，一个静态存储结构</li>
+</ol>
+<p>在一开始，消息队列是空的,当我们拿到回调函数后,会依次按照顺序存储在消息列队里,但是我们的JS主线程,异步线程和消息列队是不能直接联系的,这里就需要一个中间介质EventLoop来与他们三个沟通</p>
+<p>￼从主线程那里顺时针看,整个的流程是循环往复的<br><img src="/images/pasted-2.png" alt="upload successful"></p>
+<h4 id="微任务、宏任务"><a href="#微任务、宏任务" class="headerlink" title="微任务、宏任务"></a>微任务、宏任务</h4><p>再从我们的所有异步线程执行后的回调函数进入消息列队的时候,如果不同时间触发,那么会按照时间顺序依次进入,假如在同一时刻,不同的回调函数进入,这时就会出现先后顺序,而这里始终遵循的原则:<strong>先微任务,后宏任务</strong></p>
+<figure class="highlight coffeescript"><table><tr><td class="code"><pre><span class="line">setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> <span class="built_in">console</span>.log(<span class="number">4</span>))</span><br><span class="line"></span><br><span class="line"><span class="keyword">new</span> Promise(resolve =&gt; &#123;</span><br><span class="line">  resolve()</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="number">1</span>)</span><br><span class="line">&#125;).<span class="keyword">then</span>(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="number">3</span>)</span><br><span class="line">  Promise.resolve().<span class="keyword">then</span>(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'before timeout'</span>)</span><br><span class="line">  &#125;).<span class="keyword">then</span>(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    Promise.resolve().<span class="keyword">then</span>(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="built_in">console</span>.log(<span class="string">'also before timeout'</span>)</span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="number">2</span>)</span><br></pre></td></tr></table></figure>
+<p>结果<br><figure class="highlight applescript"><table><tr><td class="code"><pre><span class="line"><span class="number">1</span></span><br><span class="line"><span class="number">2</span></span><br><span class="line"><span class="number">3</span></span><br><span class="line"><span class="keyword">before</span> <span class="keyword">timeout</span></span><br><span class="line">also <span class="keyword">before</span> <span class="keyword">timeout</span></span><br><span class="line"><span class="number">4</span></span><br></pre></td></tr></table></figure></p>
+<h4 id="宏任务"><a href="#宏任务" class="headerlink" title="宏任务"></a>宏任务</h4><table>
+<thead>
+<tr>
+<th>#</th>
+<th style="text-align:left">浏览器</th>
+<th style="text-align:center">node</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>I/O</td>
+<td style="text-align:left">是</td>
+<td style="text-align:center">是</td>
+</tr>
+<tr>
+<td>setTimeout</td>
+<td style="text-align:left">是</td>
+<td style="text-align:center">是</td>
+</tr>
+<tr>
+<td>setInterval</td>
+<td style="text-align:left">是</td>
+<td style="text-align:center">是</td>
+</tr>
+<tr>
+<td>setImmediate</td>
+<td style="text-align:left">否</td>
+<td style="text-align:center">是</td>
+</tr>
+<tr>
+<td>requestAnimationFrame</td>
+<td style="text-align:left">是</td>
+<td style="text-align:center">否</td>
+</tr>
+</tbody>
+</table>
+<h4 id="微任务"><a href="#微任务" class="headerlink" title="微任务"></a>微任务</h4><table>
+<thead>
+<tr>
+<th>#</th>
+<th style="text-align:left">浏览器</th>
+<th style="text-align:center">node</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>process.nextTick</td>
+<td style="text-align:left">否</td>
+<td style="text-align:center">是</td>
+</tr>
+<tr>
+<td>MutationObserver</td>
+<td style="text-align:left">是</td>
+<td style="text-align:center">否</td>
+</tr>
+<tr>
+<td>Promise.then catch finally</td>
+<td style="text-align:left">是</td>
+<td style="text-align:center">是</td>
+</tr>
+</tbody>
+</table>
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-01-08</span><i class="fa fa-tag"></i><a class="tag" href="/tags/JavaScript/" title="JavaScript">JavaScript </a></div></div></div></div><div class="pagination"><ul class="clearfix"><li class="next pagbuttons"><a class="btn" role="navigation" href="/2018/12/21/NGXS总结/" title="Ngxs异步处理总结">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script></body></html>
