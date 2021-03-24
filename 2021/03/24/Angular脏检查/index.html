@@ -1,0 +1,31 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="Mccc"><title>Angular脏检查 · Mccc</title><meta name="description" content="Angular变更检测分为默认的变更检测策略和OnPush变更检测策略，这里对检测策略的原理和机制不做进一步讨论,只是对OnPush下的不同情况进行讨论.
+首先,在默认检测策略下的检测机制
+
+事件：页面内的一些列事件click、submit、mouse、down等等
+组件@Input()参数的变化("><meta name="keywords"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo@2x.png" style="width:127px;border-radius: 50%;border: 1px solid #ddd;padding: 4px;"><h3 title=""><a href="/">Mccc</a></h3></div></div><ul class="social-links"><li><a href="mailto:249749871@qq.com/" target="_blank"><i class="fa fa-envelope-o"></i></a></li><li><a href="https://github.com/angelise7" target="_blank"><i class="fa fa-github"></i></a></li></ul><div class="footer"><span>©Copyright 2018</span></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/archives">归档</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div><div class="avatar"><img src="/images/logo.png"></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>Angular脏检查</a></h3></div><div class="post-content"><p>Angular变更检测分为默认的变更检测策略和OnPush变更检测策略，这里对检测策略的原理和机制不做进一步讨论,只是对OnPush下的不同情况进行讨论.</p>
+<p>首先,在默认检测策略下的检测机制</p>
+<ul>
+<li>事件：页面内的一些列事件click、submit、mouse、down等等</li>
+<li>组件@Input()参数的变化(值引用)</li>
+<li>setTimeout()、setInterval()</li>
+<li>Observable</li>
+</ul>
+<p>OnPush策略下的检测机制</p>
+<ul>
+<li>事件：页面内的一些列事件click、submit、mouse、down等等</li>
+<li>Observable 但是需要设置 Async pipe</li>
+<li>组件@Input()参数的变化(值引用)</li>
+<li>手动使用<code>ChangeDetectorRef.detectChanges()、ChangeDetectorRef.markForCheck()、ApplicationRef.tick()</code>方法</li>
+</ul>
+<p>通过以上总结可以了解到,我们可以针对具体的业务对不同的组件实行不同的检测策略,针对我们复杂的业务,Angular也提供了ChangeDetectorRef类下的不同方法来满足我们的实际需求.</p>
+<h4 id="ChangeDetectorRef类"><a href="#ChangeDetectorRef类" class="headerlink" title="ChangeDetectorRef类"></a>ChangeDetectorRef类</h4><ul>
+<li>markForCheck()：当视图使用 OnPush（checkOnce）变更检测策略时,将检查组件的所有父组件所有子组件</li>
+<li>detach()：将变化检测对象脱离检测对象树，不再进行变化检查；结合detectChanges可实现局部变化检测</li>
+<li>detectChanges()：将检测该组件及其子组件，结合detach可实现局部检测</li>
+<li>checkNoChanges(): 检测该组件及其子组件，如果有变化存在则报错，用于开发阶段二次验证变化已经完成</li>
+<li>reattach()：将脱离的变化检测对象重新链接到变化检测树上</li>
+</ul>
+<p>1.当组件实行OnPush但组件内部需要实现某些变量的刷新,可以使用markForCheck()方法在变量修改后手动触发实现最小成本的检测.</p>
+<p>2.自定义变化检测的时机,可以通过合适的时机使用detach()和reattach()方法来实现页面的刷新.</p>
+<p>进一步深化,在测试中发现组件设置了OnPush策略后,组件内的setTimeout()、setInterval()会失效,但是当@Input()变化会引起内部计时器和定时器的再次刷新页面数据,所以OnPush模式实际上是将组件在实例化后脱离了检测对象树,再次调用reattach()方法后会重新连接到检测树上.</p>
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2021-03-24</span><i class="fa fa-tag"></i><a class="tag" href="/tags/Angular/" title="Angular">Angular </a></div></div></div></div><div class="pagination"><ul class="clearfix"><li class="next pagbuttons"><a class="btn" role="navigation" href="/2020/04/27/微信小程序环境管理/" title="微信小程序环境管理">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script></body></html>
