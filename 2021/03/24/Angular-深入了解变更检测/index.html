@@ -1,0 +1,49 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="Mccc"><title>Angular-深入了解变更检测 · Mccc</title><meta name="description" content="Angular变更检测分为默认的变更检测策略(CheckAlways)和OnPush变更检测策略(CheckOnce)，对于变更检测,网上的资源只是片面的对其进行解释,下面对变更策略进行详细的分析(Angular的变更检测是以深度优先为基础,遇到兄弟组件优先兄弟组件,然后对组件树进行单向的检测并刷新"><meta name="keywords"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo@2x.png" style="width:127px;border-radius: 50%;border: 1px solid #ddd;padding: 4px;"><h3 title=""><a href="/">Mccc</a></h3></div></div><ul class="social-links"><li><a href="mailto:249749871@qq.com/" target="_blank"><i class="fa fa-envelope-o"></i></a></li><li><a href="https://github.com/angelise7" target="_blank"><i class="fa fa-github"></i></a></li></ul><div class="footer"><span>©Copyright 2018</span></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/archives">归档</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div><div class="avatar"><img src="/images/logo.png"></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>Angular-深入了解变更检测</a></h3></div><div class="post-content"><p>Angular变更检测分为默认的变更检测策略(CheckAlways)和OnPush变更检测策略(CheckOnce)，对于变更检测,网上的资源只是片面的对其进行解释,下面对变更策略进行详细的分析(Angular的变更检测是以<strong>深度优先</strong>为基础,遇到兄弟组件优先兄弟组件,然后对组件树进行单向的检测并刷新页面数据).</p>
+<p>对于Angular而言每个组件都有一个对应的视图,视图与组件有直接的关联,而每个视图都有一个通过nodes属性链接到其子视图的链接，因此可以对子视图执行操作</p>
+<hr>
+<h4 id="视图状态"><a href="#视图状态" class="headerlink" title="视图状态"></a>视图状态</h4><p>对于每个视图而言都有一个状态,当视图状态<code>ChecksEnabled</code>为<code>false</code>或处于<code>Errored/Destroyed</code>状态下,将跳过更改检测.默认视图的状态为<code>ChecksEnabled</code>,但当处于OnPush模式下时,视图状态将变为<code>FirstCheck</code>,下面是视图的所有状态</p>
+<figure class="highlight crystal"><table><tr><td class="code"><pre><span class="line">export const <span class="class"><span class="keyword">enum</span> <span class="title">ViewState</span> &#123;</span></span><br><span class="line">  FirstCheck = <span class="number">1</span> &lt;&lt; <span class="number">0</span>,</span><br><span class="line">  ChecksEnabled = <span class="number">1</span> &lt;&lt; <span class="number">1</span>,</span><br><span class="line">  Errored = <span class="number">1</span> &lt;&lt; <span class="number">2</span>,</span><br><span class="line">  Destroyed = <span class="number">1</span> &lt;&lt; <span class="number">3</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>而这些所有的一切都被Angular封装起来成为<code>ViewRef</code>,他的另一个名称就是我们所熟知的 <code>detectChanges</code> ,通过构造函数我们可以了解到<code>detectChanges</code>下有以下几个方法</p>
+<figure class="highlight cs"><table><tr><td class="code"><pre><span class="line">export <span class="keyword">class</span> <span class="title">AppComponent</span> &#123;</span><br><span class="line">    constructor(cd: ChangeDetectorRef) &#123; ... &#125;</span><br><span class="line">    </span><br><span class="line">export declare <span class="keyword">abstract</span> <span class="keyword">class</span> <span class="title">ChangeDetectorRef</span> &#123;</span><br><span class="line">    <span class="function"><span class="keyword">abstract</span> <span class="title">checkNoChanges</span>(<span class="params"></span>): <span class="keyword">void</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">abstract</span> <span class="title">detach</span>(<span class="params"></span>): <span class="keyword">void</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">abstract</span> <span class="title">detectChanges</span>(<span class="params"></span>): <span class="keyword">void</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">abstract</span> <span class="title">markForCheck</span>(<span class="params"></span>): <span class="keyword">void</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">abstract</span> <span class="title">reattach</span>(<span class="params"></span>): <span class="keyword">void</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr>
+<h4 id="变更检测操作"><a href="#变更检测操作" class="headerlink" title="变更检测操作"></a>变更检测操作</h4><p>下面就是我们整个检测操作流程</p>
+<ol>
+<li>sets ViewState.firstCheck to true if a view is checked for the first time and to false if it was already checked before</li>
+<li>checks and updates input properties on a child component/directive instance</li>
+<li>updates child view change detection state (part of change detection strategy implementation)</li>
+<li>runs change detection for the embedded views (repeats the steps in the list)</li>
+<li>calls OnChanges lifecycle hook on a child component if bindings changed</li>
+<li>calls OnInit and ngDoCheck on a child component (OnInit is called only during first check)</li>
+<li>updates ContentChildren query list on a child view component instance</li>
+<li>calls AfterContentInit and AfterContentChecked lifecycle hooks on child component instance (AfterContentInit is called only during first check)</li>
+<li>updates DOM interpolations for the current view if properties on current view component instance changed</li>
+<li>runs change detection for a child view (repeats the steps in this list)</li>
+<li>updates ViewChildren query list on the current view component instance</li>
+<li>calls AfterViewInit and AfterViewChecked lifecycle hooks on child component instance (AfterViewInit is called only during first check)</li>
+<li>disables checks for the current view (part of change detection strategy implementation)</li>
+</ol>
+<p>通过对流程的梳理,我们知道视图的状态在我们整个变更检测中起着重要的所有.</p>
+<hr>
+<h4 id="探索"><a href="#探索" class="headerlink" title="探索"></a>探索</h4><p>回头我们再来看我们所熟知的一些知识点,就发现所有这些方法的调用都只是在更改我们视图的状态,</p>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line"><span class="bullet">1. </span>detach(), 视图状态ChecksEnabled改为了false</span><br><span class="line"><span class="bullet">2. </span>reattach(),视图状态ChecksEnabled改为了true</span><br><span class="line"><span class="bullet">3. </span>markForCheck(),仅将当前视图的ChecksEnabled状态改为true,但是如果父组件视图位启用更改检测,那么同样无效,所以相当于该方法仅对组件树中最顶层的有效</span><br><span class="line"><span class="bullet">4. </span>detectChanges(),不论当前视图的状态为什么,都会对当前组件及其子组件进行更改检测</span><br><span class="line"><span class="bullet">5. </span>checkNoChanges()开发时使用,不过多解释</span><br></pre></td></tr></table></figure>
+<p>默认检测策略下的触发时机</p>
+<ul>
+<li>事件：页面内的一些列事件click、submit、mouse、down等等</li>
+<li>组件@Input()参数的变化(值引用)</li>
+<li>setTimeout()、setInterval()</li>
+<li>Observable</li>
+</ul>
+<p><br></p>
+<p>OnPush策略下的触发时机</p>
+<ul>
+<li>事件：页面内的一些列事件click、submit、mouse、down等等</li>
+<li>Observable 但是需要设置 Async pipe</li>
+<li>组件@Input()参数的变化(值引用)</li>
+<li>手动使用<code>ChangeDetectorRef.detectChanges()、ChangeDetectorRef.markForCheck()、ApplicationRef.tick()</code>方法</li>
+</ul>
+<p><br></p>
+<p>在Angular源码中看到变化检测对象有如下几种状态：</p>
+<p>CheckOnce：表示只检查一次，调用detectChanges之后状态将会变为Checked<br>Checked：表示在状态变为CheckOnce之前会跳过所有检测<br>CheckAlways：表示总是接受变化检测，每次调用detectChanges后状态还是CheckAlways<br>Detached：代表变化检测对象脱离了变化检测对象树，不再进行变化检测<br>Errored：表述变化测试对象发生错误，变化检测实效<br>Destroyed：表示变化检测对象已经被销毁</p>
+<p><br></p>
+<p>所以OnPush策略实际是将策略变为了CheckOnce,至于CheckOnce和Checked的具体情况由于资料过少,这里没有具体的往下深入了解.</p>
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2021-03-24</span><i class="fa fa-tag"></i><a class="tag" href="/tags/Angular/" title="Angular">Angular </a></div></div></div></div><div class="pagination"><ul class="clearfix"><li class="next pagbuttons"><a class="btn" role="navigation" href="/2020/04/27/微信小程序环境管理/" title="微信小程序环境管理">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script></body></html>
