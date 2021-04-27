@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="Mccc"><title>浏览器页面渲染机制 · Mccc</title><meta name="description" content="发送&amp;amp;接收信息浏览器会从你的硬盘（或网络）中读取 HTML 的原始字节,浏览器接收字节数据后会经过重重转换翻译为浏览器可以识别的代码
+在渲染的过程中,HTML总是第一个开始进行数据的转换的
+从HTML的原始字节到DOM(Document Object Model)
+第一步:将原始数据字节转换"><meta name="keywords"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo@2x.png" style="width:127px;border-radius: 50%;border: 1px solid #ddd;padding: 4px;"><h3 title=""><a href="/">Mccc</a></h3></div></div><ul class="social-links"><li><a href="mailto:249749871@qq.com/" target="_blank"><i class="fa fa-envelope-o"></i></a></li><li><a href="https://github.com/angelise7" target="_blank"><i class="fa fa-github"></i></a></li></ul><div class="footer"><span>©Copyright 2018</span></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/archives">归档</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div><div class="avatar"><img src="/images/logo.png"></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>浏览器页面渲染机制</a></h3></div><div class="post-content"><h4 id="发送-amp-接收信息"><a href="#发送-amp-接收信息" class="headerlink" title="发送&amp;接收信息"></a>发送&amp;接收信息</h4><p>浏览器会从你的硬盘（或网络）中读取 HTML 的原始字节,浏览器接收字节数据后会经过重重转换翻译为浏览器可以识别的代码</p>
+<p>在渲染的过程中,HTML总是第一个开始进行数据的转换的</p>
+<h4 id="从HTML的原始字节到DOM-Document-Object-Model"><a href="#从HTML的原始字节到DOM-Document-Object-Model" class="headerlink" title="从HTML的原始字节到DOM(Document Object Model)"></a>从HTML的原始字节到DOM(Document Object Model)</h4><ol>
+<li>第一步:将原始数据字节转换为字符 Bytes=&gt;Characters</li>
+<li>第二步:将字符转换为标记(token) Characters=&gt;Tokens <strong> (标记化)</strong></li>
+<li>第三部:将标记转换为节点(node) Tokens=&gt;Node</li>
+<li>第四部:这些节点将被链接到称为 DOM 的树数据结构中。DOM 建立起了父子关系、相邻兄弟关系等。在这个 DOM 对象中，每个节点之间都建立了关系。现在，这是我们可以使用的东西了</li>
+</ol>
+<ul>
+<li>综合来说   Bytes=&gt;Characters=&gt;Tokens=&gt;Node=&gt;DOM</li>
+</ul>
+<p><br/></p>
+<h4 id="从CSS的原始字节到CSSOM-Css-Object-Model"><a href="#从CSS的原始字节到CSSOM-Css-Object-Model" class="headerlink" title="从CSS的原始字节到CSSOM(Css Object Model)"></a>从CSS的原始字节到CSSOM(Css Object Model)</h4><p>Css的转换和我们的HTML一样都要经过4步从原始数据到cssom</p>
+<ul>
+<li>Bytes=&gt;Characters=&gt;Tokens=&gt;Node=&gt;CSSOM</li>
+</ul>
+<p><br/></p>
+<h4 id="渲染树"><a href="#渲染树" class="headerlink" title="渲染树"></a>渲染树</h4><p>DOM 和 CSSOM 树结构是两个独立的树结构。DOM 中包含关于页面 HTML 元素关系的所有信息，而 CSSOM 则包含关于元素样式的信息</p>
+<ul>
+<li>DOM + CSSOM = 渲染树</li>
+</ul>
+<p><br/></p>
+<h4 id="布局"><a href="#布局" class="headerlink" title="布局"></a>布局</h4><p>浏览器在拿到渲染树后,会计算页面上每个对象的确切大小和位置.这个布局阶段被称为<strong>回流</strong></p>
+<p><br/></p>
+<h4 id="绘制"><a href="#绘制" class="headerlink" title="绘制"></a>绘制</h4><p>当确定好每个元素在屏幕上的位置和大小后,剩下就是将元素“绘制”到屏幕上</p>
+<p><strong> 综合:得到DOM和CSSOM =&gt; 渲染树 =&gt; 布局 =&gt; 绘制 </strong></p>
+<p><br/></p>
+<h4 id="重绘和回流"><a href="#重绘和回流" class="headerlink" title="重绘和回流"></a>重绘和回流</h4><ul>
+<li>重绘是当节点需要更改外观而不会影响布局的，比如改变 color 就叫称为重绘</li>
+<li>回流是布局或者几何属性需要改变就称为回流。</li>
+</ul>
+<p>回流必定会发生重绘，重绘不一定会引发回流。回流所需的成本比重绘高的多，改变父节点里的子节点很可能会导致父节点的一系列回流。</p>
+<p>以下几个动作可能会导致性能问题：</p>
+<ul>
+<li>改变 window 大小</li>
+<li>改变字体</li>
+<li>添加或删除样式</li>
+<li>文字改变</li>
+<li>定位或者浮动</li>
+<li>盒模型</li>
+</ul>
+<p><br/></p>
+<h4 id="减少重绘和回流"><a href="#减少重绘和回流" class="headerlink" title="减少重绘和回流"></a>减少重绘和回流</h4><ul>
+<li>使用 transform 替代 top</li>
+<li>使用 visibility 替换 display: none ，因为前者只会引起重绘，后者会引发回流（改变了布局）</li>
+<li>不要把节点的属性值放在一个循环里当成循环里的变量</li>
+<li>不要使用 table 布局，可能很小的一个小改动会造成整个 table 的重新布局</li>
+<li>动画实现的速度的选择，动画速度越快，回流次数越多，也可以选择使用 requestAnimationFrame</li>
+<li>CSS 选择符从右往左匹配查找，避免节点层级过多</li>
+<li>将频繁重绘或者回流的节点设置为图层，图层能够阻止该节点的渲染行为影响别的节点。比如对于 video 标签来说，浏览器会自动将该节点变为图层。设置节点为图层的方式有很多，我们可以通过以下几个常用属性可以生成新图层:will-change、video、iframe 标签</li>
+</ul>
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2018-09-29</span><i class="fa fa-tag"></i><a class="tag" href="/tags/浏览器/" title="浏览器">浏览器 </a></div></div></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a class="btn" role="navigation" href="/2018/10/15/Angular6实现Hot-Module-Replacement/" title="Angular6实现HMR(热模块替换)">上一篇</a></li><li class="next pagbuttons"><a class="btn" role="navigation" href="/2018/07/29/RxJs中的操作符/" title="Ionic3中懒加载的注意事项">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script></body></html>
