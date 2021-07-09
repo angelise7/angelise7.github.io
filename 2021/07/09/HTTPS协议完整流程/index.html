@@ -1,0 +1,33 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="Mccc"><title>HTTP协议、HTTPS协议 · Mccc</title><meta name="description" content="HTTPS协议包含HTTP和SSL/TLS两部分,OSI(开放式系统互联通信参考模型)实际包含物理层、数据链路层、网络层、传输层、会话层、表示层、应用层;实际中TCP/IP分为应用层(包含应用层,表示层,会话层)、传输层、网络层、数据链路层、物理层.下图为本次相关的层级,其余不做说明
+
+
+HTTP协"><meta name="keywords"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo@2x.png" style="width:127px;border-radius: 50%;border: 1px solid #ddd;padding: 4px;"><h3 title=""><a href="/">Mccc</a></h3></div></div><ul class="social-links"><li><a href="mailto:249749871@qq.com/" target="_blank"><i class="fa fa-envelope-o"></i></a></li><li><a href="https://github.com/angelise7" target="_blank"><i class="fa fa-github"></i></a></li></ul><div class="footer"><span>©Copyright 2018</span></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/archives">归档</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div><div class="avatar"><img src="/images/logo.png"></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>HTTP协议、HTTPS协议</a></h3></div><div class="post-content"><p>HTTPS协议包含HTTP和SSL/TLS两部分,OSI(开放式系统互联通信参考模型)实际包含<code>物理层</code>、<code>数据链路层</code>、<code>网络层</code>、<code>传输层</code>、<code>会话层</code>、<code>表示层</code>、<code>应用层</code>;实际中TCP/IP分为<code>应用层(包含应用层,表示层,会话层)</code>、<code>传输层</code>、<code>网络层</code>、<code>数据链路层</code>、<code>物理层</code>.下图为本次相关的层级,其余不做说明</p>
+<p><img src="/images/https.png"  width="320"></p>
+<p><br></p>
+<h6 id="HTTP协议"><a href="#HTTP协议" class="headerlink" title="HTTP协议"></a>HTTP协议</h6><p>协议过程</p>
+<ol>
+<li><p>客户端根据域名解析IP地址,</p>
+<figure class="highlight lsl"><table><tr><td class="code"><pre><span class="line"><span class="number">1.</span> 查找浏览器DNS缓存(有效期<span class="number">1</span>分增,最多容纳<span class="number">1000</span>条)</span><br><span class="line"><span class="number">2.</span> 查找系统的DNS缓存</span><br><span class="line"><span class="number">3.</span> 查找路由器的DNS缓存</span><br><span class="line"><span class="number">4.</span> 查找ISP(互联网服务提供商)的DNS缓存</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<ol start="2">
+<li>封装HTTP请求</li>
+<li><p>封装TCP包,建立TCP连接</p>
+<figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">1. 客户端向服务端发出请求报文段,首部包含<span class="attribute">SYN</span>=1,seq(序号)=x</span><br><span class="line">2. 若服务端同意请求,回复报文.首部包含<span class="attribute">SYN</span>=1,ACK=1,ack(确认号)=x+1,seq=y,(回复确认号X+1,序号y)</span><br><span class="line">3. 客户端收到服务端的报文后,通知上层应用已经建立连接,并向服务端发出确认报文.首部包含:<span class="attribute">AKC</span>=1,ack=y+1(回复确认号y+1).即次,当服务端再次收到确认报文后,则建立连接</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>客户端发送请求命令</p>
+</li>
+<li>服务端响应</li>
+<li>关闭连接</li>
+</ol>
+<p><br></p>
+<h6 id="HTTPS协议"><a href="#HTTPS协议" class="headerlink" title="HTTPS协议"></a>HTTPS协议</h6><p>在HTTP协议的基础上增加了SSL/TLS协议保证安全,<code>SSL协议</code>分为<code>SSL记录协议</code>和<code>SSL握手协议</code>,SSL记录协议建立在可靠的TCP协议之上,为高层协议提供数据的封装、压缩、加密等基本功能,SSL握手协议在实际数据传输开始前,用于对双方进行身份认证、协商加密算法、交换加密密钥等.</p>
+<p>SSL握手协议过程</p>
+<ul>
+<li>客户端发起请求包含<code>支持的协议版本</code>,<code>支持的加密及压缩算法</code>,<code>产生一个随机数</code>.</li>
+<li>服务端回复<code>稳定的加密协议版本及加密的算法</code>,<code>服务器的证书</code>,<code>服务器的随机数</code>.</li>
+<li>客户端验证证书,回复<code>随机数(使用证书公钥加密)</code>,编码改变通知,握手结束通知.</li>
+<li>服务端用证书的<code>私钥解密</code>得到客户端发来的随机数</li>
+<li>客户端和服务端约定按照<code>约定的加密</code>方式对<code>三个随机数</code>生成<code>对话密钥</code>,以便对后面的数据进行加密</li>
+</ul>
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2021-07-09</span><i class="fa fa-tag"></i><a class="tag" href="/tags/计算机网络/" title="计算机网络">计算机网络 </a></div></div></div></div><div class="pagination"><ul class="clearfix"><li class="next pagbuttons"><a class="btn" role="navigation" href="/2021/07/01/JS类型隐式转换/" title="JS类型隐式转换-ToPrimitive">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script></body></html>
