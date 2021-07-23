@@ -7,12 +7,12 @@ HTTP协议协议过程
 
 点击查看图片
 
-
+注意: PreferredType默认为Number,当input为Date类型数据时,PreferredType为String
 
 
 valueOf()
 
-var num = new Number('123');num.valueOf(); // 123var str = new String('12df');str.valueOf(); // '12df'var bo...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2021-07-01</span><i class="fa fa-tag"></i><a class="tag" href="/tags/JavaScript/" title="JavaScript">JavaScript </a></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2021/05/25/Typescript-泛型工具/">TypeScript-泛型工具</a></h3></div><div class="post-content"><p>1.可选泛型将泛型中的所有属性变为可选.
+var num = new Number('123');num.valueOf(); /...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2021-07-01</span><i class="fa fa-tag"></i><a class="tag" href="/tags/JavaScript/" title="JavaScript">JavaScript </a></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2021/05/25/Typescript-泛型工具/">TypeScript-泛型工具</a></h3></div><div class="post-content"><p>1.可选泛型将泛型中的所有属性变为可选.
 type Partial&lt;T&gt; = &#123;	[P in keyof T]?: T[P]&#125;;
 举例:
 type Person = &#123;  name: string;  age: number;  gender: string;  heig...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2021-05-25</span><i class="fa fa-tag"></i><a class="tag" href="/tags/TypeScript/" title="TypeScript">TypeScript </a></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2021/03/24/Angular-深入了解变更检测/">Angular-深入了解变更检测</a></h3></div><div class="post-content"><p>Angular变更检测分为默认的变更检测策略(CheckAlways)和OnPush变更检测策略(CheckOnce)，对于变更检测,网上的资源只是片面的对其进行解释,下面对变更策略进行详细的分析(Angular的变更检测是以深度优先为基础,遇到兄弟组件优先兄弟组件,然后对组件树进行单向的检测并刷新页面数据).
