@@ -7,22 +7,31 @@ HTTPTCP报文段结构 TC"><meta name="keywords"><meta content="width=device-wid
 <p>五层参考模型分为<code>应用层</code>、<code>传输层</code>、<code>网络层</code>、<code>数据链路层</code>、<code>物理层</code></p>
 <p><img src="/images/https.png"  width="320"></p>
 <h4 id="HTTP"><a href="#HTTP" class="headerlink" title="HTTP"></a>HTTP</h4><h6 id="TCP报文段结构"><a href="#TCP报文段结构" class="headerlink" title="TCP报文段结构"></a>TCP报文段结构</h6><p> TCP报文段结构包含TCP首部和TCP数据部分</p>
- <figure class="highlight fix"><table><tr><td class="code"><pre><span class="line"><span class="attr">TCP首部</span>=<span class="string">源端口+目的端口+序号+确认号+数据偏移(标记相同序号下的不同数据段)+保留+URG(紧急指针位)+ACK(确认位)+PSH+RST(复位)+SYN(同步请求)+FIN(结束位)+窗口(流量控制)+检验和+选项(长度可变)+填充</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">其中除了选项和填充其余的字段固定长度为20个字节</span></span><br></pre></td></tr></table></figure>
+<p> TCP首部=源端口+目的端口+<font color="red"><code>序号</code></font>+<font color="red"><code>确认号</code></font>+数据偏移(标记相同序号下的不同数据段)+保留+URG(紧急指针位)+<font color="red"><code>ACK(确认位)</code></font>+PSH+RST(复位)+<font color="red"><code>SYN(同步序列位)</code></font>+<font color="red"><code>FIN(结束位)</code></font>+窗口(流量控制)+检验和+选项(长度可变)+填充;</p>
+<p> 其中除了<code>选项</code>和<code>填充</code>其余的字段固定长度为<code>20个字节</code></p>
 <p> <br></p>
 <h6 id="运行原理"><a href="#运行原理" class="headerlink" title="运行原理"></a>运行原理</h6><ol>
-<li><p>客户端根据域名解析IP地址,</p>
-<figure class="highlight lsl"><table><tr><td class="code"><pre><span class="line"><span class="number">1.</span> 查找浏览器DNS缓存(有效期<span class="number">1</span>分增,最多容纳<span class="number">1000</span>条)</span><br><span class="line"><span class="number">2.</span> 查找系统的DNS缓存</span><br><span class="line"><span class="number">3.</span> 查找路由器的DNS缓存</span><br><span class="line"><span class="number">4.</span> 查找ISP(互联网服务提供商)的DNS缓存</span><br></pre></td></tr></table></figure>
+<li>发起HTTP请求</li>
+<li><p>建立TCP连接(建立逻辑连接,保证数据可靠)</p>
+<ul>
+<li>客户端发出请求报文段,首部包含<font color="red"><code>SYN(同步序列位)=1,seq(序号)=x;</code></font>客户端状态为<code>SYN-SENT</code>;</li>
+<li>服务端收到并同意请求,返回确认报文段,即:<font color="red"><code>ACK=1(确认位),ack(确认号)=x+1;</code>同时</font>向客户端发送同步请求,报文段首部包含<font color="red"><code>SYN=1,seq(序号)=y;</code></font>服务端状态由<code>LISTEN</code>变为<code>SYN-RCVD</code>;</li>
+<li>客户端收到后进行回复确认,报文段首部包含:<font color="red"><code>AKC=1(确认位),ack(确认号)=y+1,seq(序号)=x+1;</code></font>客户端状态由<code>SYN-SENT</code>变为<code>ESTABLISHED</code>,</li>
+<li>当服务端再次收到确认报文后,连接建立成功;服务端状态变<code>SYN-RCVD</code>变为<code>ESTABLISHED</code>;</li>
+</ul>
 </li>
-</ol>
-<ol start="2">
-<li>封装HTTP请求</li>
-<li><p>封装TCP包,建立TCP连接(建立逻辑连接,保证数据可靠)</p>
-<figure class="highlight perl"><table><tr><td class="code"><pre><span class="line"><span class="number">1</span>. 客户端发出请求报文段,首部包含SYN=<span class="number">1</span>,se<span class="string">q(序号)</span>=<span class="keyword">x</span>;客户端状态为SYN-SENT;[SYN连接请求]</span><br><span class="line"><span class="number">2</span>. 若服务端收到并同意请求,返回确认报文段,即:ACK=<span class="number">1</span>(确认位),ack(确认号)=<span class="keyword">x</span>+<span class="number">1</span>;并向客户端发送同步请求,报文段首部包含SYN=<span class="number">1</span>,se<span class="string">q(序号)</span>=<span class="keyword">y</span>;[SYNACK确认];客户端状态由SYN-SENT变为ESTABLISHED,服务端状态由LISTEN变为SYN-RCVD;</span><br><span class="line"><span class="number">3</span>. 客户端收到后进行回复确认,报文段首部包含:AKC=<span class="number">1</span>(确认位),ack(确认号)=<span class="keyword">y</span>+<span class="number">1</span>,se<span class="string">q(序号)</span>=<span class="keyword">x</span>+<span class="number">1</span>;当服务端再次收到确认报文后,连接建立成功;服务端状态变为SENT变为ESTABLISHED[ACK确认]</span><br></pre></td></tr></table></figure>
+<li><p>数据传送</p>
 </li>
-<li><p>客户端发送请求命令</p>
-</li>
-<li>服务端响应并返回数据</li>
-<li>关闭TCP连接 <figure class="highlight perl"><table><tr><td class="code"><pre><span class="line">客户端和服务端都可以发起关闭</span><br><span class="line"><span class="number">1</span>.客户端发送请求报文段,首部包含FIN=<span class="number">1</span>(结束位),se<span class="string">q(序号)</span>=<span class="keyword">x</span>;客户端状态由ESTABLISHED变为FIN-WAIT-<span class="number">1</span>;</span><br><span class="line"><span class="number">2</span>.服务端收到后向回复确认,报文段首部包含:ACK(确认位)=<span class="number">1</span>,ack(确认位)=<span class="keyword">x</span>+<span class="number">1</span>,se<span class="string">q(序号)</span>=<span class="keyword">y</span>;服务端状态由ESTABLISHED变为CLOSE-WAIT;</span><br><span class="line"><span class="number">3</span>.客户端收到后状态由FIN-WAIT-<span class="number">1</span>变为FIN-WAIT-<span class="number">2</span>;</span><br><span class="line"><span class="number">3</span>.一段时间后,服务端确认不再向客户端传输数据,再次向客户端发送请求报文段,首部包含:FIN(结束位)=<span class="number">1</span>,ACK(确认位)=<span class="number">1</span>,ack=<span class="keyword">x</span>+<span class="number">1</span>,se<span class="string">q(序号)</span>=z;服务端状态由CLOSE-WAIT变为LAST-ACK;</span><br><span class="line"><span class="number">4</span>.客户端收到后进行回复确认,报文段首部包含:ACK(确认位)=<span class="number">1</span>,ack(确认号)=z+<span class="number">1</span>,se<span class="string">q(序号)</span>=<span class="keyword">x</span>+<span class="number">1</span>;客户端状态由FIN-WAIT-<span class="number">2</span>变为TIME-WAIT</span><br><span class="line"><span class="number">5</span>.服务端收到报文后状态由LAST-ACK变为CLOSED</span><br><span class="line"><span class="number">5</span>.两分钟后,客户端断开连接,状态由TIME-WAIT变为CLOSED</span><br></pre></td></tr></table></figure>
+<li><p>关闭TCP连接(客户端和服务端都可以发起关闭请求)</p>
+<ul>
+<li>若客户端不再向服务端发送数据时,客户端首先发送请求报文段,首部包含<font color="red"><code>FIN=1(结束位),seq(序号)=x;</code></font>客户端状态由<code>ESTABLISHED</code>变为<code>FIN-WAIT-1</code>;</li>
+<li>服务端收到后回复确认,报文段首部包含:<font color="red"><code>ACK(确认位)=1,ack(确认位)=x+1,seq(序号)=y;</code></font>服务端状态由<code>ESTABLISHED</code>变为<code>CLOSE-WAIT</code>;</li>
+<li>客户端收到回复后状态由<code>FIN-WAIT-1</code>变为<code>FIN-WAIT-2</code>;</li>
+<li><font color="red">一段时间后</font>,服务端确认不再向客户端传输数据,再次向客户端发送请求报文段,首部包含:<font color="red"><code>FIN(结束位)=1,ACK(确认位)=1,ack=x+1,seq(序号)=z;</code></font>服务端状态由<code>CLOSE-WAIT</code>变为<code>LAST-ACK</code>;</li>
+<li>客户端收到后进行回复确认,报文段首部包含:<font color="red"><code>ACK(确认位)=1,ack(确认号)=z+1,seq(序号)=x+1;</code></font>客户端状态由FIN-WAIT-2变为TIME-WAIT</li>
+<li>服务端收到报文后状态由<code>LAST-ACK</code>变为<code>CLOSED</code></li>
+<li>两分钟后,客户端断开连接,状态由<code>TIME-WAIT</code>变为<code>CLOSED</code></li>
+</ul>
 </li>
 </ol>
 <p><br></p>
