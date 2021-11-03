@@ -33,7 +33,8 @@ GPU进程
 <p><br></p>
 <p>渲染进程在运行JS代码时,JS的引擎会维护一组代理,每个代理由一组执行上下文、执行上下文堆栈、一个主线程、一组用于处理工作线程的附加线程、一个<code>任务队列</code>和一个<code>微任务队列</code>组成;除了主线程之外,代理的每个组件对于该代理都是唯一的.</p>
 <p><br></p>
-<h3 id="事件循环-Event-Loop"><a href="#事件循环-Event-Loop" class="headerlink" title="事件循环(Event Loop)"></a>事件循环(Event Loop)</h3><h4 id="概括"><a href="#概括" class="headerlink" title="概括"></a>概括</h4><p>每个代理都有一个事件驱循环驱动,用来收集任何用户和其他事件,事件循环分为三种类型:<code>窗口事件循环(Window event loop)</code>、<code>工人事件循环(Worker event loop)</code>、<code>Worklet事件循环(Worklet event loop)</code></p>
+<h3 id="事件循环-Event-Loop"><a href="#事件循环-Event-Loop" class="headerlink" title="事件循环(Event Loop)"></a>事件循环(Event Loop)</h3><h4 id="概括"><a href="#概括" class="headerlink" title="概括"></a>概括</h4><p>每个代理都有一个事件驱循环驱动,用来收集任何用户和其他事件,将任务排入队列以处理每个回调。然后它运行任何挂起的 JavaScript 任务，然后是任何挂起的微任务，然后执行任何需要的渲染和绘制，然后再次循环以检查挂起的任务;</p>
+<p>事件循环分为三种类型:<code>窗口事件循环(Window event loop)</code>、<code>工人事件循环(Worker event loop)</code>、<code>Worklet事件循环(Worklet event loop)</code></p>
 <p>这个过程中大概的步骤为:</p>
 <ol>
 <li>出列并运行任务列队中最早的任务或上一轮入列的任务</li>
@@ -45,14 +46,16 @@ GPU进程
 <li>渲染更改</li>
 <li>重复步骤1</li>
 </ol>
-<h4 id="任务"><a href="#任务" class="headerlink" title="任务"></a>任务</h4><ul>
+<h4 id="任务"><a href="#任务" class="headerlink" title="任务"></a>任务</h4><p>一个任务就是由执行诸如从头执行一段程序、执行一个事件回调或一个 interval/timeout 被触发之类的标准机制而被调度的任意 JavaScript 代码。这些都在 任务队列（task queue）上被调度</p>
+<ul>
 <li><font color=#FF0000><code>script</code></font> （主代码块）</li>
 <li><font color=#FF0000><code>setTimeout</code></font> </li>
 <li><font color=#FF0000><code>setInterval</code></font> </li>
 <li><font color=#FF0000><code>setImmediate</code></font> - </li>
 <li>I/O 、UI rendering</li>
 </ul>
-<h4 id="微任务"><a href="#微任务" class="headerlink" title="微任务"></a>微任务</h4><ul>
+<h4 id="微任务"><a href="#微任务" class="headerlink" title="微任务"></a>微任务</h4><p>与任务最大的区别在于他们将会在一个任务退出并且执行上下文为空时,一次执行微任务列队里的所有任务</p>
+<ul>
 <li><font color=#FF0000><code>process.nextTick</code></font>（Nodejs）</li>
 <li><font color=#FF0000><code>promise</code></font> </li>
 <li><font color=#FF0000><code>Object.observe</code></font> </li>
