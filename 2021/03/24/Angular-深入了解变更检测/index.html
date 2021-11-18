@@ -58,14 +58,13 @@ Angular变更检测分为默认的变更检测策略(CheckAlways)和OnPush变更
 <li>事件：页面内的一些列事件click、submit、mouse、down等等</li>
 <li>Observable 但是需要设置 Async pipe</li>
 <li>组件@Input()参数的变化(值引用)</li>
-<li>手动使用<code>ChangeDetectorRef.detectChanges()、ChangeDetectorRef.markForCheck()、ApplicationRef.tick()</code>方法</li>
+<li><p>手动使用<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">&lt;br&gt;</span><br><span class="line"></span><br><span class="line">在Angular源码中看到变化检测对象`ChangeDetectorStatus`有如下几种状态：</span><br><span class="line"></span><br><span class="line">CheckOnce：表示只检查一次，调用detectChanges之后状态将会变为Checked</span><br><span class="line">Checked：表示在状态变为CheckOnce之前会跳过所有检测</span><br><span class="line">CheckAlways：表示总是接受变化检测，每次调用detectChanges后状态还是CheckAlways</span><br><span class="line">Detached：代表变化检测对象脱离了变化检测对象树，不再进行变化检测</span><br><span class="line">Errored：表述变化测试对象发生错误，变化检测实效</span><br><span class="line">Destroyed：表示变化检测对象已经被销毁</span><br><span class="line"></span><br><span class="line">&lt;br&gt;</span><br><span class="line"></span><br><span class="line">#### 应用 ####</span><br><span class="line">1. 将组件设置为`OnPush`模式、`markForCheck()`和非纯管道`async`组合的形式优化性能</span><br><span class="line">2. 将组件脱离文档流`detach()`,并调用`detectChanges()`来进行局部的变更检测</span><br><span class="line">3. 局部代码通过`zone.js`来实现在合适的时机进行变更检测</span><br></pre></td></tr></table></figure></p>
+<p> this.ngZone.runOutsideAngular(() =&gt; {</p>
+<pre><code>   this._sub = Observable.timer(1000, 1000)
+   .subscribe(i =&gt; this.ngZone.run(() =&gt; {
+      this.content = &quot;Loaded! &quot; + i;
+}));
+</code></pre><p>  });<br> <code>`</code></p>
+</li>
 </ul>
-<p><br></p>
-<p>在Angular源码中看到变化检测对象<code>ChangeDetectorStatus</code>有如下几种状态：</p>
-<p>CheckOnce：表示只检查一次，调用detectChanges之后状态将会变为Checked<br>Checked：表示在状态变为CheckOnce之前会跳过所有检测<br>CheckAlways：表示总是接受变化检测，每次调用detectChanges后状态还是CheckAlways<br>Detached：代表变化检测对象脱离了变化检测对象树，不再进行变化检测<br>Errored：表述变化测试对象发生错误，变化检测实效<br>Destroyed：表示变化检测对象已经被销毁</p>
-<p><br></p>
-<h4 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h4><ol>
-<li>将组件设置为<code>OnPush</code>模式、<code>markForCheck()</code>和非纯管道<code>async</code>组合的形式优化性能</li>
-<li>将组件脱离文档流<code>detach()</code>,并调用<code>detectChanges()</code>来进行局部的变更检测</li>
-</ol>
 </div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2021-03-24</span><i class="fa fa-tag"></i><a class="tag" href="/tags/Angular/" title="Angular">Angular </a></div></div></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a class="btn" role="navigation" href="/2021/05/25/Typescript-泛型工具/" title="TypeScript-泛型工具">上一篇</a></li><li class="next pagbuttons"><a class="btn" role="navigation" href="/2020/04/27/微信小程序环境管理/" title="微信小程序环境管理">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script></body></html>
