@@ -4,8 +4,7 @@
 编译器(TurboFan):编译出高效的机器代码
 
 
-#V8垃圾回收机制V8内存结构
-New Space(新生区)：大多数对象被分...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2021-12-08</span><i class="fa fa-tag"></i><a class="tag" href="/tags/V8/" title="V8">V8 </a></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2021/08/02/记一次针对获取验证码的指令封装/">记一次针对防止按钮连击的Angular指令封装</a></h3></div><div class="post-content"><p>针对业务需要,整个流程为点击按钮=&gt;调取异步方法=&gt;设置操作状态=&gt;异步结束,重置状态;其中调取异步方法中,点击按钮时都无效或不可点击
+#V8的惰性解析和预解析V8的解析阶段会将源文本解析为抽象语法树,再交由解释...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2021-12-08</span><i class="fa fa-tag"></i><a class="tag" href="/tags/V8/" title="V8">V8 </a></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2021/08/02/记一次针对获取验证码的指令封装/">记一次针对防止按钮连击的Angular指令封装</a></h3></div><div class="post-content"><p>针对业务需要,整个流程为点击按钮=&gt;调取异步方法=&gt;设置操作状态=&gt;异步结束,重置状态;其中调取异步方法中,点击按钮时都无效或不可点击
 将业务封装自定义指令,通过点击按钮后监听事件,在DOM上设置属性来判断本次点击事件时的状态,但次方法对于多层DOM结构时会出现一些致命BUG导致无法生效,所以这...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2021-08-02</span><i class="fa fa-tag"></i><a class="tag" href="/tags/Angular/" title="Angular">Angular </a></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2021/07/09/HTTPS协议完整流程/">HTTP、HTTPS</a></h3></div><div class="post-content"><p>OSI(开放式系统互联通信)参考模型分为应用层、表示层、会话层、传输层、网络层、数据链路层、物理层、;
 TCP/IP模型分为应用层(应用层,表示层,会话层)、运输层、网际层、网络接口层(数据链路层、物理层)
 五层参考模型分为应用层、传输层、网络层、数据链路层、物理层

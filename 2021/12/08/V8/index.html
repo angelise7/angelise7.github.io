@@ -4,12 +4,16 @@
 编译器(TurboFan):编译出高效的机器代码
 
 
-#V8垃圾回收机制V8内存结构
-New Space(新生区)："><meta name="keywords"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo@2x.png" style="width:127px;border-radius: 50%;border: 1px solid #ddd;padding: 4px;"><h3 title=""><a href="/">Mccc</a></h3></div></div><ul class="social-links"><li><a href="mailto:249749871@qq.com/" target="_blank"><i class="fa fa-envelope-o"></i></a></li><li><a href="https://github.com/angelise7" target="_blank"><i class="fa fa-github"></i></a></li></ul><div class="footer"><span>©Copyright 2018</span></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/archives">归档</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div><div class="avatar"><img src="/images/logo.png"></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>浅谈V8</a></h3></div><div class="post-content"><h3 id="工作流程"><a href="#工作流程" class="headerlink" title="#工作流程"></a>#工作流程</h3><ul>
+#V8的惰性解析和预解析V8的解析阶段会将源文本解析为抽象语法"><meta name="keywords"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo@2x.png" style="width:127px;border-radius: 50%;border: 1px solid #ddd;padding: 4px;"><h3 title=""><a href="/">Mccc</a></h3></div></div><ul class="social-links"><li><a href="mailto:249749871@qq.com/" target="_blank"><i class="fa fa-envelope-o"></i></a></li><li><a href="https://github.com/angelise7" target="_blank"><i class="fa fa-github"></i></a></li></ul><div class="footer"><span>©Copyright 2018</span></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/archives">归档</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div><div class="avatar"><img src="/images/logo.png"></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>浅谈V8</a></h3></div><div class="post-content"><h3 id="工作流程"><a href="#工作流程" class="headerlink" title="#工作流程"></a>#工作流程</h3><ul>
 <li>解析器(parser):将JS代码解析成抽象语法树AST</li>
 <li>解释器(Ignition):将抽象语法树(AST)解释成字节码(bytecode),同时可以解释执行字节码的能力</li>
 <li>编译器(TurboFan):编译出高效的机器代码</li>
 </ul>
+<p><br></p>
+<h3 id="V8的惰性解析和预解析"><a href="#V8的惰性解析和预解析" class="headerlink" title="#V8的惰性解析和预解析"></a>#V8的惰性解析和预解析</h3><p>V8的解析阶段会将源文本解析为抽象语法树,再交由解释器解释成字节码,事实上,解析前会经历一系列的操作;这个过程大根是先将源文本(UTF-8、Latin1、ASCII)转为UTF-16的字符流,扫描器(Scanner)通过组合底层字符流中的连续字符来构造这些标记。然后提供给解析器;</p>
+<h4 id="惰性解析"><a href="#惰性解析" class="headerlink" title="惰性解析"></a>惰性解析</h4><p>解析器在解析顶层代码过程中,如果遇到函数声明,不会跳过函数,而是对函数进行一次快速的预解析;仅生成顶层代码的AST和字节码;当然在这个过程中又引入了一个新的概念<code>预解析</code>,仅仅验证函数是否有语法上的错误,并且生成正确编译外部函数所需要的信息,当函数真正被调用的时候,才会完全解析并且按需编译;</p>
+<p><br></p>
+<h4 id="预解析"><a href="#预解析" class="headerlink" title="预解析"></a>预解析</h4><p>在预解析的过程中,最主要的工作就是确定函数内的变量是否被内部函数引用了;如果有就会在堆内存上分配变量;(对于顶层变量来说,都是在堆中分配的),也就是所谓的<code>闭包</code>;</p>
 <p><br></p>
 <h3 id="V8垃圾回收机制"><a href="#V8垃圾回收机制" class="headerlink" title="#V8垃圾回收机制"></a>#V8垃圾回收机制</h3><h4 id="V8内存结构"><a href="#V8内存结构" class="headerlink" title="V8内存结构"></a>V8内存结构</h4><ul>
 <li>New Space(新生区)：大多数对象被分配在这里。新生区是一个很小的区域，垃圾回收(Scavenger)在这个区域非常频繁，与其他区域相独立。新生区会被等分成两个区域（Semi Space），我们分别称这两个区域为 <code>From</code> 和 <code>To</code></li>
@@ -45,7 +49,7 @@ New Space(新生区)："><meta name="keywords"><meta content="width=device-width
 </ol>
 <p><strong>对象内属性</strong>:对象在创建的时候会初始化一定大小的空间,当对象内的属性没有超过这个大小时,这么属性会直接存储在对象本身上,可以快速访问;以这些方式存在的属性叫做<code>对象内属性</code></p>
 <p><strong>快属性</strong>:<a href="https://www.geeksforgeeks.org/difference-between-linear-and-non-linear-data-structures/">线性数据结构</a>的读取速度更快,因此将存储在线性结构中的属性成为快属性</p>
-<p><strong>慢属性</strong>:存在于自包含的属性字典中，元信息不再通过 HiddenClass 共享;慢属性允许有效的属性删除和添加，但访问速度比其他两种类型慢</p>
+<p><strong>慢属性</strong>:存在于自包含的属性字典中，元信息不再通过 HiddenClass 共享;慢属性允许有效的属性删除和添加,但访问速度比其他两种类型慢;倘若一个对象频繁地增删属性,V8将这些本来会存储在线性结构中的快属性降级为慢属性</p>
 <p><br></p>
 <h4 id="快慢数组"><a href="#快慢数组" class="headerlink" title="快慢数组"></a>快慢数组</h4><ol>
 <li>快数组是一种<code>线性的存储方式</code>，内部存储是连续的内存（新创建的空数组，默认的存储方式是快数组）；</li>
@@ -64,5 +68,6 @@ New Space(新生区)："><meta name="keywords"><meta content="width=device-width
 <li><a href="https://z3rog.tech/blog/2020/fast-properties.html#%E5%AF%B9%E8%B1%A1">https://z3rog.tech/blog/2020/fast-properties.html#%E5%AF%B9%E8%B1%A1</a></li>
 <li><a href="https://v8.dev/blog/trash-talk">https://v8.dev/blog/trash-talk</a></li>
 <li><a href="https://benediktmeurer.de/2017/12/13/an-introduction-to-speculative-optimization-in-v8/">https://benediktmeurer.de/2017/12/13/an-introduction-to-speculative-optimization-in-v8/</a></li>
+<li><a href="https://v8.dev/blog/preparser#fn1">https://v8.dev/blog/preparser#fn1</a></li>
 </ol>
 </div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2021-12-08</span><i class="fa fa-tag"></i><a class="tag" href="/tags/V8/" title="V8">V8 </a></div></div></div></div><div class="pagination"><ul class="clearfix"><li class="next pagbuttons"><a class="btn" role="navigation" href="/2021/08/02/记一次针对获取验证码的指令封装/" title="记一次针对防止按钮连击的Angular指令封装">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script></body></html>
