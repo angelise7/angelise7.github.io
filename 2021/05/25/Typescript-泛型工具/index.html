@@ -11,6 +11,7 @@ type Person = &amp;#123;  name: string;  age: number;  gender: string"><meta nam
 <p>这里的K实际作为键值使用,所以仅可用<code>number|string|symbol</code>类型</p>
 <p>举例:</p>
 <figure class="highlight autoit"><table><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> obj: Record&lt;<span class="built_in">string</span>, <span class="built_in">string</span> | <span class="built_in">number</span>&gt; = &#123;</span><br><span class="line">  name: <span class="string">'zhangsan'</span>,</span><br><span class="line">  age: <span class="number">18</span>,</span><br><span class="line">  weight: <span class="number">80</span>,</span><br><span class="line">  gender: <span class="string">'男'</span>,</span><br><span class="line">&#125;<span class="comment">;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">interface CatInfo &#123;</span><br><span class="line">  age: number;</span><br><span class="line">  breed: string;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">type CatName = <span class="string">"miffy"</span> | <span class="string">"boris"</span> | <span class="string">"mordred"</span>;</span><br><span class="line"> </span><br><span class="line">const cats: Record&lt;CatName, CatInfo&gt; = &#123;</span><br><span class="line">  miffy: &#123; age: 10, breed: <span class="string">"Persian"</span> &#125;,</span><br><span class="line">  boris: &#123; age: 5, breed: <span class="string">"Maine Coon"</span> &#125;,</span><br><span class="line">  mordred: &#123; age: 16, breed: <span class="string">"British Shorthair"</span> &#125;,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <p><br></p>
 <h4 id="3-从T类型中提取K的键值列出来组成新的类型"><a href="#3-从T类型中提取K的键值列出来组成新的类型" class="headerlink" title="3.从T类型中提取K的键值列出来组成新的类型"></a>3.从T类型中提取K的键值列出来组成新的类型</h4><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">type</span> <span class="title">Pick&lt;T</span>, <span class="title">K</span> <span class="keyword">extends</span> <span class="title">keyof</span> <span class="title">T&gt;</span> </span>= &#123;</span><br><span class="line">    [<span class="type">P</span> in <span class="type">K</span>]: <span class="type">T</span>[<span class="type">P</span>];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <p>举例:定义一个人的类型</p>
@@ -67,7 +68,19 @@ type Person = &amp;#123;  name: string;  age: number;  gender: string"><meta nam
 </tr>
 <tr>
 <td><code>ReturnType&lt;T&gt;</code></td>
-<td style="text-align:left">获取T类型对应的返回值类型</td>
+<td style="text-align:left">获取T类型(函数)对应的返回值类型</td>
+</tr>
+<tr>
+<td><code>Readonly&lt;T&gt;</code></td>
+<td style="text-align:left">将类型T中所有属性变为只读</td>
+</tr>
+<tr>
+<td><code>Extract&lt;T,K&gt;</code></td>
+<td style="text-align:left">取T类型和K类型的交集组成新的类型</td>
+</tr>
+<tr>
+<td><code>NonNullable&lt;T&gt;</code></td>
+<td style="text-align:left">去除T类型中的null和undefined类型</td>
 </tr>
 </tbody>
 </table>
