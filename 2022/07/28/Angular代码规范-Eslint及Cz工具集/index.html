@@ -9,7 +9,7 @@ ng add @angular-eslint/schematics
 ng g @angular-eslint/schematics:conve"><meta name="keywords"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="shortcut icon" type="image/x-icon" href="/images/favicon.webp"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="stylesheet" href="/css/insight.css"><link rel="stylesheet" href="/css/search.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"><script src="/js/jquery.js"></script></head><body><div class="page-top animated fadeInDown"><div class="nav"><li> <a href="/">首页</a></li><li> <a href="/archives">归档</a></li></div><div class="information"><div class="nav_right_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li><li><a class="fa fa-search" onclick="openWindow();"></a></li></div><div class="avatar"><img src="/images/logo.png"></div></div></div><div class="sidebar animated fadeInDown"><div class="sidebar-top"><div class="logo-title"><div class="title"><img src="/images/logo@2x.png" style="width:127px;border-radius: 50%;border: 1px solid #ddd;padding: 4px;"><h3 title><a href="/">Mccc</a></h3></div><ul class="social-links"><li><a href="https://github.com/angelise7"><i class="fa fa-github"></i></a></li><li><a href="mailto:249749871@qq.com"><i class="fa fa-envelope"></i></a></li></ul></div></div><div class="footer"><div class="beian"></div></div></div><div class="main"><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>Angular代码规范:Eslint及Cz工具集</a></h3></div><div class="post-content"><p></p><p>本文主要记录Eslint和Cz工具集配置过程:</p>
 <h4 id="第一步：安装并配置angular-eslint"><a href="#第一步：安装并配置angular-eslint" class="headerlink" title="第一步：安装并配置angular-eslint"></a>第一步：安装并配置<code>angular-eslint</code></h4><ol>
 <li><p>安装核心库;</p>
-<figure class="highlight css"><table><tr><td class="code"><pre><span class="line"><span class="selector-tag">ng</span> <span class="selector-tag">add</span> @<span class="keyword">angular</span>-<span class="keyword">eslint</span>/<span class="keyword">schematics</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight dockerfile"><table><tr><td class="code"><pre><span class="line">ng <span class="keyword">add</span><span class="bash"> @angular-eslint/schematics</span></span><br></pre></td></tr></table></figure>
 </li>
 </ol>
 <ol start="2">
@@ -32,7 +32,7 @@ ng g @angular-eslint/schematics:conve"><meta name="keywords"><meta content="widt
 </ol>
 <ol start="2">
 <li><p>安装符合Angular规范的提交说明,初始化适配器;</p>
-<figure class="highlight brainfuck"><table><tr><td class="code"><pre><span class="line"><span class="comment">commitizen</span> <span class="comment">init</span> <span class="comment">cz</span><span class="literal">-</span><span class="comment">conventional</span><span class="literal">-</span><span class="comment">changelog</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">save</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">save</span><span class="literal">-</span><span class="comment">exact</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight brainfuck"><table><tr><td class="code"><pre><span class="line"><span class="comment">commitizen</span> <span class="comment">init</span> <span class="comment">cz</span><span class="literal">-</span><span class="comment">conventional</span><span class="literal">-</span><span class="comment">changelog</span> --<span class="comment">save</span> --<span class="comment">save</span><span class="literal">-</span><span class="comment">exact</span></span><br></pre></td></tr></table></figure>
 </li>
 </ol>
 <ol start="3">
@@ -45,7 +45,7 @@ ng g @angular-eslint/schematics:conve"><meta name="keywords"><meta content="widt
 </ol>
 <ol start="2">
 <li><p>安装符合Angular风格的校验规则</p>
-<figure class="highlight css"><table><tr><td class="code"><pre><span class="line"><span class="selector-tag">npm</span> <span class="selector-tag">install</span> <span class="selector-tag">--save-dev</span> @<span class="keyword">commitlint</span>/<span class="keyword">config</span>-<span class="keyword">conventional</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight coffeescript"><table><tr><td class="code"><pre><span class="line"><span class="built_in">npm</span> install --save-dev @commitlint/config-conventional</span><br></pre></td></tr></table></figure>
 </li>
 </ol>
 <ol start="3">
@@ -55,7 +55,7 @@ ng g @angular-eslint/schematics:conve"><meta name="keywords"><meta content="widt
 </ol>
 <p><br></p>
 <h4 id="第四步：安装husky-使用钩子来结合eslint和commitlint工具"><a href="#第四步：安装husky-使用钩子来结合eslint和commitlint工具" class="headerlink" title="第四步：安装husky,使用钩子来结合eslint和commitlint工具;"></a>第四步：安装<code>husky</code>,使用钩子来结合eslint和commitlint工具;</h4><ol>
-<li>安装<code>husky</code>;<figure class="highlight mipsasm"><table><tr><td class="code"><pre><span class="line">npm <span class="keyword">install </span>husky -D<span class="comment">;</span></span><br></pre></td></tr></table></figure>
+<li>安装<code>husky</code>;<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">npm <span class="keyword">install</span> husky -D;</span><br></pre></td></tr></table></figure>
 </li>
 </ol>
 <ol start="2">
@@ -63,10 +63,10 @@ ng g @angular-eslint/schematics:conve"><meta name="keywords"><meta content="widt
 </li>
 </ol>
 <ol start="3">
-<li>添加钩子文件,其中<code>pre-commit</code>钩子用来运行<code>ng lint</code>;<code>commit-msg</code>钩子用来约束提交的msg规则;<figure class="highlight dockerfile"><table><tr><td class="code"><pre><span class="line">npx husky <span class="keyword">add</span><span class="bash"> .husky/pre-commit <span class="string">"npx ng lint &#123;&#123;YOUR_PROJECT_NAME_GOES_HERE&#125;&#125;    --fix </span></span></span><br><span class="line"><span class="bash"></span></span><br><span class="line"><span class="bash">npx husky add .husky/commit-msg <span class="string">'npx --no-install commitlint --edit "$1"'</span></span></span><br></pre></td></tr></table></figure>
+<li>添加钩子文件,其中<code>pre-commit</code>钩子用来运行<code>ng lint</code>;<code>commit-msg</code>钩子用来约束提交的msg规则;<figure class="highlight dockerfile"><table><tr><td class="code"><pre><span class="line">npx husky <span class="keyword">add</span><span class="bash"> .husky/pre-commit <span class="string">"npx ng lint &#123;&#123;YOUR_PROJECT_NAME_GOES_HERE&#125;&#125;    --fix </span></span></span><br><span class="line"></span><br><span class="line">npx husky <span class="keyword">add</span><span class="bash"> .husky/commit-msg <span class="string">'npx --no-install commitlint --edit "$1"'</span></span></span><br></pre></td></tr></table></figure>
 </li>
 </ol>
 <p><br></p>
-<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><p>   修改代码后进行提交<br>   <figure class="highlight dockerfile"><table><tr><td class="code"><pre><span class="line">git <span class="keyword">add</span><span class="bash"> file</span></span><br><span class="line"><span class="bash"></span></span><br><span class="line"><span class="bash">git cz</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><p>   修改代码后进行提交<br>   <figure class="highlight dockerfile"><table><tr><td class="code"><pre><span class="line">git <span class="keyword">add</span><span class="bash"> file</span></span><br><span class="line"></span><br><span class="line">git cz</span><br></pre></td></tr></table></figure></p>
 <p><img src="/images/cz/1.jpg"><br>根据规范选择合适的类别,并补充其余信息即可.</p>
 <p></p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2022-07-28</span><span class="leancloud_visitors"></span><span>大约356个字, 1分钟11秒读完</span></div></div></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a class="btn" role="navigation" href="/2022/11/25/深入理解Typescript/" title="深入理解Typescript">上一篇</a></li><li class="next pagbuttons"><a class="btn" role="navigation" href="/2022/07/27/Angular-viewport-适配方案/" title="Angular-Viewport适配方案">下一篇</a></li></ul></div><script src="/js/visitors.js"></script></div></div></div></div><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script><script src="/js/add-bookmark.js"></script><script>(function(window){var INSIGHT_CONFIG={TRANSLATION:{POSTS:"文章",PAGES:"页面",CATEGORIES:"分类",TAGS:"标签",UNTITLED:"(无标题)",},CONTENT_URL:"/content.json",};window.INSIGHT_CONFIG=INSIGHT_CONFIG})(window);</script><script src="/js/insight.js" defer></script><div class="searchbox ins-search"><div class="searchbox-container ins-search-container"><div class="searchbox-input-wrapper"><input class="searchbox-input ins-search-input" type="text" placeholder="想要查找什么..."><span class="searchbox-close"><a class="fa fa-times-circle" onclick="closeWindow();"></a></span></div><div class="searchbox-result-wrapper ins-section-wrapper"><div class="ins-section-container"><p>Seraching...</p></div></div></div></div></body></html>
