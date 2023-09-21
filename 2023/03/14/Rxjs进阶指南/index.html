@@ -1,2 +1,119 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="Mccc"><title>Rxjs进阶指南 · Mccc</title><meta name="description" content="rxjs操作符的总结:https://www.yuque.com/wangqiang-upwdy/dbz1cc/hc80c9l2ws9gamyp#DFw0V"><meta name="keywords"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo@2x.png" style="width:127px;border-radius: 50%;border: 1px solid #ddd;padding: 4px;"><h3 title=""><a href="/">Mccc</a></h3></div></div><ul class="social-links"><li><a href="mailto:249749871@qq.com/" target="_blank"><i class="fa fa-envelope-o"></i></a></li><li><a href="https://github.com/angelise7" target="_blank"><i class="fa fa-github"></i></a></li></ul><div class="footer"><span>©Copyright 2018</span></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/archives">归档</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div><div class="avatar"><img src="/images/logo.png"></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>Rxjs进阶指南</a></h3></div><div class="post-content"><p>rxjs操作符的总结:<a href="https://www.yuque.com/wangqiang-upwdy/dbz1cc/hc80c9l2ws9gamyp#DFw0V">https://www.yuque.com/wangqiang-upwdy/dbz1cc/hc80c9l2ws9gamyp#DFw0V</a></p>
-</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2023-03-14</span><i class="fa fa-tag"></i></div></div></div></div><div class="pagination"><ul class="clearfix"><li class="next pagbuttons"><a class="btn" role="navigation" href="/2023/01/16/Promsie深度解析/" title="Promise深度解析">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script></body></html>
+<!DOCTYPE html><html lang="zh-CN"><head><meta name="generator" content="Hexo 3.9.0"><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="Mccc"><title>Rxjs操作符 · Mccc</title><meta name="description" content="创建操作符
+defer(订阅时通过工厂函数创建Observable)   
+form(创建一个Array、类数组对象、Promise、可迭代对象的Observable)
+formEvent(从 DOM 事件或 Node.js EventEmitter 事件或其它事件创建一个 Observable)
+"><meta name="keywords"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="shortcut icon" type="image/x-icon" href="/images/favicon.webp"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="stylesheet" href="/css/insight.css"><link rel="stylesheet" href="/css/search.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"><script src="/js/jquery.js"></script></head><body><div class="page-top animated fadeInDown"><div class="nav"><li> <a href="/">首页</a></li><li> <a href="/archives">归档</a></li></div><div class="information"><div class="nav_right_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li><li><a class="fa fa-search" onclick="openWindow();"></a></li></div><div class="avatar"><img src="/images/logo.png"></div></div></div><div class="sidebar animated fadeInDown"><div class="sidebar-top"><div class="logo-title"><div class="title"><img src="/images/logo@2x.png" style="width:127px;border-radius: 50%;border: 1px solid #ddd;padding: 4px;"><h3 title><a href="/">Mccc</a></h3></div><ul class="social-links"><li><a href="https://github.com/angelise7"><i class="fa fa-github"></i></a></li><li><a href="mailto:249749871@qq.com"><i class="fa fa-envelope"></i></a></li></ul></div></div><div class="footer"><div class="beian"></div></div></div><div class="main"><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>Rxjs操作符</a></h3></div><div class="post-content"><p></p><h4 id="创建操作符"><a href="#创建操作符" class="headerlink" title="创建操作符"></a>创建操作符</h4><ol>
+<li>defer(订阅时通过工厂函数创建Observable)   </li>
+<li>form(创建一个Array、类数组对象、Promise、可迭代对象的Observable)</li>
+<li>formEvent(从 DOM 事件或 Node.js EventEmitter 事件或其它事件创建一个 Observable)</li>
+<li>interval(计时器)</li>
+<li>of</li>
+<li>range(创建一个发送指定长度递增的连续整数)</li>
+<li>timer(定时器/计时器)</li>
+<li>iif(返回一个布尔值,从两个Observable中选择一个)</li>
+</ol>
+<p><br></p>
+<h4 id="联结创建操作符"><a href="#联结创建操作符" class="headerlink" title="联结创建操作符"></a>联结创建操作符</h4><ol>
+<li>combineLatest(订阅内部所有的Observable,每个Observable都至少发送一个值后,外部Observable才发送值的集合,直到内部所有的Observable都完成)</li>
+<li>zip(订阅内部所有的Observable,每个Observable都至少发送一个值后,外部Observable才发送值的集合,直到内部任意一个Observable完成,则外部Observable完成)</li>
+</ol>
+<figure class="highlight golo"><table><tr><td class="code"><pre><span class="line">相同点:</span><br><span class="line"><span class="number">1.</span> 内部的每个<span class="keyword">Observable</span>至少发送一个值才输出外部的<span class="keyword">Observable</span>,否则不输出任何值</span><br><span class="line"></span><br><span class="line">区别:</span><br><span class="line"><span class="number">1.</span>combineLatest:内部所有的Observabale都完成,外部的<span class="keyword">Observable</span>才完成</span><br><span class="line"><span class="number">2.</span>zip:只要一个内部的<span class="keyword">Observable</span>完成,则外部的<span class="keyword">Observable</span>完成</span><br></pre></td></tr></table></figure>
+<hr>
+<ol start="3">
+<li>forkJoin(订阅内部所有的Observable,内部所有的Observable都完成后统一发出最新值的集合)    </li>
+</ol>
+<hr>
+<ol start="4">
+<li>concat(订阅内部所有的Observable.顺序输出内部Observable的每个值,前一个Observable完成后才会开始输出下一个Observable)</li>
+<li>merge(订阅内部所有的Observable,内部任意一个Observable发送值则外部就同步发送值,内部所有的Observable完成后,外部Observable才完成)</li>
+</ol>
+<figure class="highlight makefile"><table><tr><td class="code"><pre><span class="line"><span class="section">相同点:</span></span><br><span class="line">1.输出单一值</span><br></pre></td></tr></table></figure>
+<hr>
+<ol start="6">
+<li>partition(类似filter,返回两个Observable,一个符合条件的Observable,另一个不符合条件的Observable)</li>
+<li>race(使用首个发出值的Observable)</li>
+</ol>
+<p><br></p>
+<h4 id="转换操作符"><a href="#转换操作符" class="headerlink" title="转换操作符"></a>转换操作符</h4><ol>
+<li>concatMap(将源Observable的每个值映射为一个新的Observable,只有前一个值对应的Observable完成后才会开始订阅下一个值的Observable)</li>
+<li>concatMapTo(与concatMap功能类似,但是会将源Observable的值输出为固定值)</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">//下面的例子,外部源Observable每2秒输出一个值,经过concatMap后,再延迟5秒输出值</span></span><br><span class="line"><span class="keyword">const</span> source = interval(<span class="number">2000</span>);</span><br><span class="line">source</span><br><span class="line">	.pipe(concatMap(<span class="function">(<span class="params">val</span>) =&gt;</span> <span class="keyword">of</span>(val).pipe(delay(<span class="number">5000</span>))))</span><br><span class="line">	.subscribe(<span class="function">(<span class="params">r</span>) =&gt;</span> &#123;</span><br><span class="line">		<span class="built_in">console</span>.log(r);	</span><br><span class="line">	&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//7秒后输出第一个值,之后每5秒继续输出</span></span><br><span class="line"><span class="comment">//7000ms-&gt; 0 -12000ms-&gt; 1 -17000ms-&gt; 2 -22000ms-&gt; 3</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line">注意:如果源数据的会无穷的输出值并且比<span class="keyword">project</span>的速度要快,就会使外部源的值挤压在内存区等待订阅,因此会产生内存问题,比如上面这个例子,如果长时间运行就会产生内存问题</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>mergeMap(将源Observable的每个值映射为一个新的Observable,与concanMap的区别是,内部的所有Observable会同时开始订阅)</li>
+<li>mergeMapTo</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">//下面的例子,外部源Observable每2秒输出一个值</span></span><br><span class="line"><span class="comment">//经过mergeMap后,内部同时订阅所有的Observable,内部再等待5s后会同时开始输出所有的值</span></span><br><span class="line"><span class="keyword">const</span> source = interval(<span class="number">2000</span>);</span><br><span class="line">source</span><br><span class="line">	.pipe(mergeMap(<span class="function">(<span class="params">val</span>) =&gt;</span> <span class="keyword">of</span>(val).pipe(delay(<span class="number">5000</span>))))</span><br><span class="line">	.subscribe(<span class="function">(<span class="params">r</span>) =&gt;</span> &#123;</span><br><span class="line">		<span class="built_in">console</span>.log(r);	</span><br><span class="line">	&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//7秒后输出第一个值,之后每2秒继续输出</span></span><br><span class="line"><span class="comment">//7000ms-&gt; 0 -9000ms-&gt; 1 -11000ms-&gt; 2 -13000ms-&gt; 3</span></span><br></pre></td></tr></table></figure>
+<ol start="5">
+<li>switchMap(将源Observable的每个值映射为一个新的Observable,与mergeMap的区别是,内部只会维护一个Observable,当下一个Observable开始时会取消前一个Observable)</li>
+<li>exhaustMap(将源Observablede值,按照project的规则进行输出,若当前值还没有输出完毕,新到达的值会被忽略掉)</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">//下面的例子,源值在经过exhaustMap时会先延迟1s输出,再延迟后输出值时正好源Observable的下一个值抵达,此时会被忽略掉</span></span><br><span class="line"><span class="keyword">const</span> source = interval(<span class="number">1000</span>);</span><br><span class="line">source</span><br><span class="line">	.pipe(exhaustMap(<span class="function">(<span class="params">val</span>) =&gt;</span> <span class="keyword">of</span>(val).pipe(delay(<span class="number">1000</span>))))</span><br><span class="line">	.subscribe(<span class="function">(<span class="params">r</span>) =&gt;</span> &#123;</span><br><span class="line">		<span class="built_in">console</span>.log(r);</span><br><span class="line">	&#125;);</span><br><span class="line"><span class="comment">//2000ms-&gt; 0 -4000ms-&gt;2 -6000ms-&gt;4</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight golo"><table><tr><td class="code"><pre><span class="line">concatMap,mergeMap,switchMap,exhaustMap务必区分它们不同的用法</span><br><span class="line">这四个操作符的共同点都是会针对源<span class="keyword">Observable</span>的每个值映射为一个单独的内部<span class="keyword">Observable</span>,但是在合并输出<span class="keyword">Observable</span>时有自己不同的规则</span><br><span class="line">concatMap:前一个值的<span class="keyword">Observable</span>完成后才会开始下一个,顺序输出这些<span class="keyword">Observable</span>(有序的),一些极端情况下会积压待订阅的<span class="keyword">Observable</span>,会存在内存问题</span><br><span class="line">mergeMap:同时订阅值对应的所有<span class="keyword">Observable</span>并且输出,内部会维护很多<span class="keyword">Observable</span>所以会有内存的问题</span><br><span class="line">switchMap:内部维护一个<span class="keyword">Observable</span>,当新的值抵达时,会取消前一个<span class="keyword">Observable</span>并订阅新的<span class="keyword">Observable</span></span><br><span class="line">exhaustMap:当前<span class="keyword">Observable</span>未完成前会忽略新抵达值的<span class="keyword">Observable</span></span><br></pre></td></tr></table></figure>
+<hr>
+<ol start="7">
+<li>expand(将源Observable的值,递归调用project函数)</li>
+<li>pairwise(将当前值和先前值放在一起作成一个数组，并发送它.只有再第二个值时才开始发送,因为第一个值没有前一个值)</li>
+<li>pluck(将每个源值映射到其指定的嵌套属性)</li>
+<li>groupBy</li>
+</ol>
+<hr>
+<ol start="11">
+<li>scan(与reduce 函数类似)</li>
+<li>switchScan</li>
+<li>mergeScan</li>
+</ol>
+<hr>
+<ol start="14">
+<li>map(与Array.prototype.map 函数类似,映射每一个值)</li>
+<li>mapTo(与Array.prototype.map 函数类似,映射每一个值至常量)</li>
+</ol>
+<p><br></p>
+<h4 id="过滤操作符"><a href="#过滤操作符" class="headerlink" title="过滤操作符"></a>过滤操作符</h4><ol>
+<li>auditTime(在 duration 毫秒内忽略源值，然后从源 Observable 发送最新值)</li>
+<li>debounceTime(舍弃掉两次输入之间小于指定时间的值,用于防抖)</li>
+<li>throttleTime(忽略指定之间内的值,用于节流)</li>
+</ol>
+<hr>
+<ol start="4">
+<li>distince(发送订阅的Observable中没有的值)</li>
+<li>distinctUntilChanged(发送订阅的Observable与前一个值不相等的值,使用===)</li>
+<li>distinctUntilKeyChanged(根据键值比较与前一个值是否相等,并返回)</li>
+</ol>
+<hr>
+<ol start="7">
+<li>take(只发送源Observable的N个值)</li>
+<li>takeLast(源Observable完成,然后取最后N个值,源Observable完成时生效)</li>
+<li>takeWhile(源Observable的值不满足条件时,完成源Observable,注意区分filter)</li>
+<li>takeUntil(当提供的Observable发出值时,完成源Observable)</li>
+</ol>
+<hr>
+<ol start="11">
+<li>skip(跳过开头的值)</li>
+<li>skipLast(源Observable完成前跳过最后指定数量的值,源Observable完成时生效)</li>
+<li>skipUntil(跳过源Observable的值,直到第二个Observable开始发送值)</li>
+<li>skipWhile(跳过源Observable的值,直到表达式为fals开始发送值)</li>
+</ol>
+<hr>
+<ol start="15">
+<li>first(发出第一个值或最近到达的值)</li>
+<li>last(发出最后一个值)</li>
+</ol>
+<hr>
+<ol start="17">
+<li>sample(每当提供的Observable发射值时,从源Observable中获取最近的值)</li>
+<li>sampleTime(周期性的从源Observable中获取最近的值,与sample类似)</li>
+</ol>
+<hr>
+<ol start="19">
+<li>elementAt(发送源 Observable 的发送序列中位于指定 index 处的单个值)</li>
+<li>single(发出源Observable中符合表达式的单一值)</li>
+<li>filter(与Array.prototype.filter 方法类似)</li>
+</ol>
+<p><br></p>
+<h4 id="多播操作符"><a href="#多播操作符" class="headerlink" title="多播操作符"></a>多播操作符</h4><ol>
+<li>share(多播,转为热的Observable)</li>
+<li>publish</li>
+</ol>
+<p></p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2023-03-14</span><span class="leancloud_visitors"></span><span>大约1590个字, 5分钟18秒读完</span></div></div></div></div><div class="pagination"><ul class="clearfix"><li class="next pagbuttons"><a class="btn" role="navigation" href="/2023/01/16/Promsie深度解析/" title="Promise深度解析">下一篇</a></li></ul></div><script src="/js/visitors.js"></script></div></div></div></div><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script><script src="/js/add-bookmark.js"></script><script>(function(window){var INSIGHT_CONFIG={TRANSLATION:{POSTS:"文章",PAGES:"页面",CATEGORIES:"分类",TAGS:"标签",UNTITLED:"(无标题)",},CONTENT_URL:"/content.json",};window.INSIGHT_CONFIG=INSIGHT_CONFIG})(window);</script><script src="/js/insight.js" defer></script><div class="searchbox ins-search"><div class="searchbox-container ins-search-container"><div class="searchbox-input-wrapper"><input class="searchbox-input ins-search-input" type="text" placeholder="想要查找什么..."><span class="searchbox-close"><a class="fa fa-times-circle" onclick="closeWindow();"></a></span></div><div class="searchbox-result-wrapper ins-section-wrapper"><div class="ins-section-container"><p>Seraching...</p></div></div></div></div></body></html>
