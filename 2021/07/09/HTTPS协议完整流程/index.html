@@ -1,0 +1,91 @@
+<!DOCTYPE html><html lang="zh-cn"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content="OSI(开放式系统互联通信)参考模型分为&lt;code&gt;应用层&lt;/code&gt;、&lt;code&gt;表示层&lt;/code&gt;、&lt;code&gt;会话层&lt;/code&gt;、&lt;code&gt;传输层&lt;/code&gt;、&lt;code&gt;网络层&lt;/code&gt;、&lt;code&gt;数据链路层&lt;/code&gt;、&lt;code&gt;物理层&lt;/code&gt;、;"><link rel="stylesheet" type="text/css" href="/css/normalize.css"><link rel="stylesheet" type="text/css" href="/css/highlight.css"><link rel="stylesheet" type="text/css" href="/css/noise.css"><title>HTTP、HTTPS | Mccc</title><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><meta name="generator" content="Hexo 7.3.0"></head><body><article class="wrapper"><div class="post-main"><div class="nav"><nav class="container"><a class="sidebar-nav-item active" href="/">Home</a><a class="sidebar-nav-item" href="/archives">Archives</a></nav><div class="container post-meta"><div class="post-tags"><a class="post-tag-noise-link" href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" rel="tag">计算机网络</a></div><div class="post-time">2021-07-09</div></div></div><div class="container post-header"><h1>HTTP、HTTPS</h1></div><div class="container post-toc"><details class="toc"><summary class="toc-accordion"></summary><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#HTTP"><span class="toc-number">1.</span> <span class="toc-text">HTTP</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#TCP%E6%8A%A5%E6%96%87%E6%AE%B5%E7%BB%93%E6%9E%84"><span class="toc-number">1.1.</span> <span class="toc-text">TCP报文段结构</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%90%E8%A1%8C%E5%8E%9F%E7%90%86"><span class="toc-number">1.2.</span> <span class="toc-text">运行原理</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%A9%E5%B1%95"><span class="toc-number">2.</span> <span class="toc-text">扩展</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#HTTPS"><span class="toc-number">3.</span> <span class="toc-text">HTTPS</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%A9%E5%B1%95-1"><span class="toc-number">4.</span> <span class="toc-text">扩展</span></a></li></ol></details></div><div class="container post-content"><p>OSI(开放式系统互联通信)参考模型分为<code>应用层</code>、<code>表示层</code>、<code>会话层</code>、<code>传输层</code>、<code>网络层</code>、<code>数据链路层</code>、<code>物理层</code>、;</p>
+<p>TCP&#x2F;IP模型分为<code>应用层(应用层,表示层,会话层)</code>、<code>运输层</code>、<code>网际层</code>、<code>网络接口层(数据链路层、物理层)</code></p>
+<p>五层参考模型分为<code>应用层</code>、<code>传输层</code>、<code>网络层</code>、<code>数据链路层</code>、<code>物理层</code></p>
+<img src="/images/http/osi.png"  width="320">
+
+
+<h3 id="HTTP"><a href="#HTTP" class="headerlink" title="HTTP"></a>HTTP</h3><h4 id="TCP报文段结构"><a href="#TCP报文段结构" class="headerlink" title="TCP报文段结构"></a>TCP报文段结构</h4><p> TCP报文段结构包含TCP首部和TCP数据部分</p>
+<ul>
+<li>TCP首部&#x3D;源端口+目的端口+<font color="red"><code>序号(seq)</code></font>+<font color="red"><code>确认号(ack)</code></font>+数据偏移(标记相同序号下的不同数据段)+保留+<font color="red">标志位</font>+窗口(流量控制)+检验和+选项(长度可变)+填充;</li>
+</ul>
+ <img src="/images/http/TCP.jpg"  width="320">
+ 
+<ul>
+<li>标志位&#x3D;URG(紧急指针位)+<font color="red"><code>ACK(确认位)</code></font>+PSH+RST(复位)+<font color="red"><code>SYN(同步序列位)</code></font>+<font color="red"><code>FIN(结束位)</code></font></li>
+</ul>
+ <img src="/images/http/sign.jpg"  width="320">
+
+<p>  其中除了<code>选项</code>和<code>填充</code>其余的字段固定长度为<code>20个字节</code></p>
+ <br>
+
+<h4 id="运行原理"><a href="#运行原理" class="headerlink" title="运行原理"></a>运行原理</h4><ol>
+<li>发起HTTP请求</li>
+<li>建立TCP连接(建立逻辑连接,保证数据可靠),也叫做三次握手</li>
+</ol>
+<ul>
+<li>客户端发出请求报文段,首部包含<font color="red"><code>SYN(同步序列位)=1,seq(序号)=x;</code></font>客户端状态为<code>SYN-SENT</code>;</li>
+<li>服务端收到并同意请求,返回确认报文段,即:<font color="red"><code>ACK=1(确认位),ack(确认号)=x+1;</code>同时</font>向客户端发送同步请求,报文段首部包含<font color="red"><code>SYN=1,seq(序号)=y;</code></font>服务端状态由<code>LISTEN</code>变为<code>SYN-RCVD</code>;</li>
+<li>客户端收到后进行回复确认,报文段首部包含:<font color="red"><code>AKC=1(确认位),ack(确认号)=y+1,seq(序号)=x+1;</code></font>客户端状态由<code>SYN-SENT</code>变为<code>ESTABLISHED</code>,</li>
+<li>当服务端再次收到确认报文后,连接建立成功;服务端状态变<code>SYN-RCVD</code>变为<code>ESTABLISHED</code>;</li>
+</ul>
+<ol start="3">
+<li>数据传送</li>
+<li>关闭TCP连接(客户端和服务端都可以发起关闭请求),也叫做四次挥手</li>
+</ol>
+<ul>
+<li>若客户端不再向服务端发送数据时,客户端首先发送请求报文段,首部包含<font color="red"><code>FIN=1(结束位),seq(序号)=x;</code></font>客户端状态由<code>ESTABLISHED</code>变为<code>FIN-WAIT-1</code>;</li>
+<li>服务端收到后回复确认,报文段首部包含:<font color="red"><code>ACK(确认位)=1,ack(确认位)=x+1,seq(序号)=y;</code></font>服务端状态由<code>ESTABLISHED</code>变为<code>CLOSE-WAIT</code>;</li>
+<li>客户端收到回复后状态由<code>FIN-WAIT-1</code>变为<code>FIN-WAIT-2</code>;</li>
+<li><font color="red">一段时间后</font>,服务端确认不再向客户端传输数据,再次向客户端发送请求报文段,首部包含:<font color="red"><code>FIN(结束位)=1,ACK(确认位)=1,ack=x+1,seq(序号)=z;</code></font>服务端状态由<code>CLOSE-WAIT</code>变为<code>LAST-ACK</code>;</li>
+<li>客户端收到后进行回复确认,报文段首部包含:<font color="red"><code>ACK(确认位)=1,ack(确认号)=z+1,seq(序号)=x+1;</code></font>客户端状态由FIN-WAIT-2变为TIME-WAIT</li>
+<li>服务端收到报文后状态由<code>LAST-ACK</code>变为<code>CLOSED</code></li>
+<li>两分钟后,客户端断开连接,状态由<code>TIME-WAIT</code>变为<code>CLOSED</code></li>
+</ul>
+<br>
+
+<h3 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h3><p>HTTP&#x2F;2相比HTTP&#x2F;1.1改变了哪些?<br> <div class="noise-code-block" style="--code-block-max-height:inherit;"><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1.兼容HTTP/1.1</span><br><span class="line">2.头部压缩</span><br><span class="line">3.二进制帧</span><br><span class="line">4.并发传输</span><br><span class="line">5.服务器主动推送资源</span><br></pre></td></tr></table></figure></div></p>
+<br>
+
+<p>在上面的TCP三次握手和四次挥手过程中存在一些问题,例如</p>
+<ul>
+<li><p>第一次握手，如果客户端发送的SYN一直都传不到被服务器，那么客户端是一直重发SYN到永久吗？客户端停止重发SYN的时机是什么？</p>
+</li>
+<li><p>第三次握手，如果服务器永远不会收到ACK，服务器就永远都留在 Syn-Recv 状态了吗？退出此状态的时机是什么？</p>
+</li>
+<li><p>第三次挥手，如果客户端永远收不到 FIN,ACK，客户端永远停留在 Fin-Wait-2状态了吗？退出此状态时机是什么时候呢？</p>
+</li>
+<li><p>第四次挥手，如果服务器永远收不到 ACK，服务器永远停留在 Last-Ack 状态了吗？退出此状态的时机是什么呢？</p>
+</li>
+<li><p>如果客户端 在 2SML内依旧没收到 FIN,ACK，会关闭链接吗？服务器那边怎么办呢，是怎么关闭链接的呢？</p>
+</li>
+</ul>
+<p>以上问题对于大部分前端工程师来说不是必须掌握的知识点,文章底部的链接有对应的详细说明;</p>
+<br>
+
+
+<h3 id="HTTPS"><a href="#HTTPS" class="headerlink" title="HTTPS"></a>HTTPS</h3><p>在HTTP的基础上增加了SSL&#x2F;TLS协议保证安全,保证了在通信的过程中<font color="red"><code>消息机密性</code>、<code>消息完整性</code>、<code>身份验证</code></font>;</p>
+<p><code>SSL/TLS协议</code>分为<code>SSL/TLS记录协议</code>和<code>SSL/TLS握手协议</code>,SSL&#x2F;TLS记录协议建立在可靠的TCP之上,为高层协议提供数据的封装、压缩、加密等基本功能,SSL&#x2F;TLS握手协议在实际数据传输开始前,用于对双方进行身份认证、协商加密算法、交换加密密钥等.</p>
+<img src="/images/http/https.png"  width="320">
+
+
+<p>SSL&#x2F;TLS握手协议过程</p>
+<ul>
+<li>客户端向服务端发起加密通信请求,需要包含<code>支持的协议版本</code>、<code>客户端生成的随机数(稍后用于对话密钥)</code>、<code>支持的加密方法</code>、<code>支持的压缩方法</code></li>
+<li>收到客户端的请求后,服务端做出回应,包含<code>确认使用的加密通信协议版本</code>、<code>服务端生成的随机数(稍后用于对话密钥)</code>、<code>确认使用的加密方法</code>、<code>服务器证书</code></li>
+<li>客户端收到回应后,首先<code>验证服务器证书</code>,没问题后向服务端发送信息,包含<code>随机数(服务器公钥加密)</code>、<code>编码改变通知(之后的信息使用约定的加密方式和方法进行通信)</code>、<code>客户端握手结束通知</code></li>
+<li>服务端收到信息后,再次向客户端回复,包含<code>编码改变通知(之后的信息使用约定的加密方式和方法进行通信)</code>、<code>服务器握手结束通知</code></li>
+</ul>
+<br>
+
+<h3 id="扩展-1"><a href="#扩展-1" class="headerlink" title="扩展"></a>扩展</h3><ul>
+<li>HTTPS是如何保证信息的机密性?<div class="noise-code-block" style="--code-block-max-height:inherit;"><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">采用混合加密,通信前通过非对称加密交换会话秘钥,通信过程中使用对称加密方式加密数据,既</span><br><span class="line">保证了安全性的前提下又保证了运算速度</span><br></pre></td></tr></table></figure></div></li>
+<li>HTTPS是如何保证信息的完整性? <div class="noise-code-block" style="--code-block-max-height:inherit;"><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">通过摘要算法算出明文的指纹,将明文与指纹一同加密发送给服务器,服务器通过指纹对比来确</span><br><span class="line">保数据的完整性</span><br></pre></td></tr></table></figure></div></li>
+<li>HTTPS是如何验证身份? <div class="noise-code-block" style="--code-block-max-height:inherit;"><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">数字证书</span><br></pre></td></tr></table></figure></div></li>
+</ul>
+<hr>
+<p>参考文章:</p>
+<p>1.<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/CTqag_TxAHLuUwLvbrmlnw">https://mp.weixin.qq.com/s/CTqag_TxAHLuUwLvbrmlnw</a><br>2.<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1xJ41137Q3?p=20">https://www.bilibili.com/video/BV1xJ41137Q3?p=20</a><br>3.<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/TvGAmKKrKrcWlsV2cfC34g">https://mp.weixin.qq.com/s/TvGAmKKrKrcWlsV2cfC34g</a></p>
+</div></div><div class="post-main post-comment"></div></article><link rel="stylesheet" type="text/css" href="/css/third-party/font-awesome/4.5.0/font-awesome.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcdn.net/ajax/libs/lato-font/3.0.0/css/lato-font.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcdn.net/ajax/libs/fancybox/2.1.5/jquery.fancybox.css"><script src="/js/third-party/jquery/2.0.3/jquery.min.js"></script><script src="/js/third-party/fancybox/2.1.5/jquery.fancybox.pack.js"></script><script>$(document).ready(function() {
+  $(".fancybox").fancybox();
+});
+</script></body></html>

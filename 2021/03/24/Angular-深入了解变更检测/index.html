@@ -1,0 +1,86 @@
+<!DOCTYPE html><html lang="zh-cn"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content="更新于2021.11.17&lt;br&gt;version:12+"><link rel="stylesheet" type="text/css" href="/css/normalize.css"><link rel="stylesheet" type="text/css" href="/css/highlight.css"><link rel="stylesheet" type="text/css" href="/css/noise.css"><title>Angular-深入了解变更检测 | Mccc</title><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><meta name="generator" content="Hexo 7.3.0"></head><body><article class="wrapper"><div class="post-main"><div class="nav"><nav class="container"><a class="sidebar-nav-item active" href="/">Home</a><a class="sidebar-nav-item" href="/archives">Archives</a></nav><div class="container post-meta"><div class="post-tags"><a class="post-tag-noise-link" href="/tags/Angular/" rel="tag">Angular</a></div><div class="post-time">2021-03-24</div></div></div><div class="container post-header"><h1>Angular-深入了解变更检测</h1></div><div class="container post-toc"><details class="toc"><summary class="toc-accordion"></summary><ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A7%86%E5%9B%BE%E7%8A%B6%E6%80%81"><span class="toc-number">1.</span> <span class="toc-text">视图状态####</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%98%E6%9B%B4%E6%A3%80%E6%B5%8B%E6%93%8D%E4%BD%9C"><span class="toc-number">2.</span> <span class="toc-text">变更检测操作####</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8E%A2%E7%B4%A2"><span class="toc-number">3.</span> <span class="toc-text">探索</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BA%94%E7%94%A8"><span class="toc-number">4.</span> <span class="toc-text">应用</span></a></li></ol></details></div><div class="container post-content"><p>更新于2021.11.17<br>version:12+</p>
+<hr>
+<p>Angular变更检测分为默认的变更检测策略(CheckAlways)和OnPush变更检测策略(CheckOnce)，对于变更检测,网上的资源只是片面的对其进行解释,下面对变更策略进行详细的分析(Angular的变更检测是以<strong>深度优先</strong>为基础,遇到兄弟组件优先兄弟组件,然后对组件树进行单向的检测并刷新页面数据).</p>
+<p>对于Angular而言每个组件都有一个对应的视图<code>View</code>,视图与组件有直接的关联,而每个视图都有一个通过nodes属性链接到其子视图的链接，因此可以对子视图执行操作</p>
+<hr>
+<h4 id="视图状态"><a href="#视图状态" class="headerlink" title="视图状态####"></a>视图状态####</h4><p>对于每个视图而言都有一个状态<code>State</code>,当视图状态<code>ChecksEnabled</code>为<code>false</code>或处于<code>Errored/Destroyed</code>状态下,将跳过更改检测.默认视图的状态<code>ChecksEnabled</code>为<code>true</code>,但当处于OnPush策略下时,视图状态将<code>ChecksEnabled</code>将变为<code>false</code>,OnPus策略会影响当前组件及其所有子组件;只有当input属性发生变化时,才会重新对视图进行变更检测</p>
+<div class="noise-code-block" style="--code-block-max-height:inherit;"><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">//OnPush策略下更改视图状态</span><br><span class="line">if (view.def.flags &amp; ViewFlags.OnPush) &#123;</span><br><span class="line">  view.state &amp;= ~ViewState.ChecksEnabled;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+<div class="noise-code-block" style="--code-block-max-height:inherit;"><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">//视图状态</span><br><span class="line">export const enum ViewState &#123;</span><br><span class="line">  BeforeFirstCheck = 1 &lt;&lt; 0,</span><br><span class="line">  FirstCheck = 1 &lt;&lt; 1,</span><br><span class="line">  Attached = 1 &lt;&lt; 2,</span><br><span class="line">  ChecksEnabled = 1 &lt;&lt; 3,</span><br><span class="line">  IsProjectedView = 1 &lt;&lt; 4,</span><br><span class="line">  CheckProjectedView = 1 &lt;&lt; 5,</span><br><span class="line">  CheckProjectedViews = 1 &lt;&lt; 6,</span><br><span class="line">  Destroyed = 1 &lt;&lt; 7,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<p>而Angulr将这一概念称为<code>ViewRef</code>,它封装了基础组件视图,并且有一个我们所熟知的名称 <code>detectChanges </code> ,通过构造函数我们可以了解到<code>detectChanges</code>下有以下几个方法</p>
+<div class="noise-code-block" style="--code-block-max-height:inherit;"><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">export class AppComponent &#123;</span><br><span class="line">    constructor(cd: ChangeDetectorRef) &#123; ... &#125;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">export declare abstract class ChangeDetectorRef &#123;</span><br><span class="line">    abstract checkNoChanges(): void;</span><br><span class="line">    abstract detach(): void;</span><br><span class="line">    abstract detectChanges(): void;</span><br><span class="line">    abstract markForCheck(): void;</span><br><span class="line">    abstract reattach(): void;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<hr>
+<h4 id="变更检测操作"><a href="#变更检测操作" class="headerlink" title="变更检测操作####"></a>变更检测操作####</h4><p>下面就是我们整个检测操作流程</p>
+<ol>
+<li>sets ViewState.firstCheck to true if a view is checked for the first time and to false if it was already checked before</li>
+<li>checks and updates input properties on a child component&#x2F;directive instance</li>
+<li>updates child view change detection state (part of change detection strategy implementation)</li>
+<li>runs change detection for the embedded views (repeats the steps in the list)</li>
+<li>calls OnChanges lifecycle hook on a child component if bindings changed</li>
+<li>calls OnInit and ngDoCheck on a child component (OnInit is called only during first check)</li>
+<li>updates ContentChildren query list on a child view component instance</li>
+<li>calls AfterContentInit and AfterContentChecked lifecycle hooks on child component instance (AfterContentInit is called only during first check)</li>
+<li>updates DOM interpolations for the current view if properties on current view component instance changed</li>
+<li>runs change detection for a child view (repeats the steps in this list)</li>
+<li>updates ViewChildren query list on the current view component instance</li>
+<li>calls AfterViewInit and AfterViewChecked lifecycle hooks on child component instance (AfterViewInit is called only during first check)</li>
+<li>disables checks for the current view (part of change detection strategy implementation)</li>
+</ol>
+<p>通过对流程的梳理,我们知道视图的状态在我们整个变更检测中起着重要的所有.</p>
+<p>假如有A&gt;&gt;B&gt;&gt;C三个组件按照这个层级结构,他们钩子的调用顺序如下</p>
+<div class="noise-code-block" style="--code-block-max-height:inherit;"><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">A: AfterContentInit</span><br><span class="line">A: AfterContentChecked</span><br><span class="line">A: Update bindings</span><br><span class="line">    B: AfterContentInit</span><br><span class="line">    B: AfterContentChecked</span><br><span class="line">    B: Update bindings</span><br><span class="line">        C: AfterContentInit</span><br><span class="line">        C: AfterContentChecked</span><br><span class="line">        C: Update bindings</span><br><span class="line">        C: AfterViewInit</span><br><span class="line">        C: AfterViewChecked</span><br><span class="line">    B: AfterViewInit</span><br><span class="line">    B: AfterViewChecked</span><br><span class="line">A: AfterViewInit</span><br><span class="line">A: AfterViewChecked</span><br></pre></td></tr></table></figure></div>
+
+<hr>
+<h4 id="探索"><a href="#探索" class="headerlink" title="探索"></a>探索</h4><p>回头我们再来看我们所熟知的一些知识点,就发现所有这些方法的调用都只是在更改我们视图的状态,</p>
+<ol>
+<li>detach()</li>
+</ol>
+  <div class="noise-code-block" style="--code-block-max-height:inherit;"><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">this._view.state &amp;= ~ViewState.Attached;</span><br></pre></td></tr></table></figure></div>
+<ol start="2">
+<li>reattach()</li>
+</ol>
+  <div class="noise-code-block" style="--code-block-max-height:inherit;"><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">this._view.state |= ViewState.Attached;</span><br></pre></td></tr></table></figure></div>
+
+<ol start="3">
+<li>markForCheck():</li>
+</ol>
+  <div class="noise-code-block" style="--code-block-max-height:inherit;"><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">export function markParentViewsForCheck(view: ViewData) &#123;</span><br><span class="line">   let currView: ViewData|null = view;</span><br><span class="line">   while (currView) &#123;</span><br><span class="line">     if (currView.def.flags &amp; ViewFlags.OnPush) &#123;</span><br><span class="line">       currView.state |= ViewState.ChecksEnabled;</span><br><span class="line">     &#125;</span><br><span class="line">     currView = currView.viewContainerParent || currView.parent;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+<ol start="4">
+<li>detectChanges():这里与detach()可以局部刷新的原理就是首先将组件脱离视图,避免脏检查,同时在需要的地方调用detectChanges(),翻看源码发现detectChanges调用了视图的基础方法<code>checkAndUpdateView()</code>来更新数据</li>
+<li>checkNoChanges()开发时使用,不过多解释</li>
+</ol>
+<p>默认检测策略下的触发时机</p>
+<ul>
+<li>事件：页面内的一些列事件click、submit、mouse、down等等</li>
+<li>组件@Input()参数的变化(值引用)</li>
+<li>setTimeout()、setInterval()</li>
+<li>Observable</li>
+</ul>
+<br>
+
+<p>OnPush策略下的触发时机</p>
+<ul>
+<li>事件：页面内的一些列事件click、submit、mouse、down等等</li>
+<li>Observable 但是需要设置 Async pipe</li>
+<li>组件@Input()参数的变化(值引用)</li>
+<li>手动使用<code>ChangeDetectorRef.detectChanges()、ChangeDetectorRef.markForCheck()、ApplicationRef.tick()</code>方法</li>
+</ul>
+<br>
+
+<p>在Angular源码中看到变化检测对象<code>ChangeDetectorStatus</code>有如下几种状态：</p>
+<p>CheckOnce：表示只检查一次，调用detectChanges之后状态将会变为Checked<br>Checked：表示在状态变为CheckOnce之前会跳过所有检测<br>CheckAlways：表示总是接受变化检测，每次调用detectChanges后状态还是CheckAlways<br>Detached：代表变化检测对象脱离了变化检测对象树，不再进行变化检测<br>Errored：表述变化测试对象发生错误，变化检测实效<br>Destroyed：表示变化检测对象已经被销毁</p>
+<br>
+
+<h4 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h4><ol>
+<li><p>将组件设置为<code>OnPush</code>模式、<code>markForCheck()</code>和非纯管道<code>async</code>组合的形式优化性能</p>
+</li>
+<li><p>将组件脱离文档流<code>detach()</code>,并调用<code>detectChanges()</code>来进行局部的变更检测</p>
+</li>
+<li><p>局部代码通过<code>zone.js</code>来实现在合适的时机进行变更检测</p>
+<div class="noise-code-block" style="--code-block-max-height:inherit;"><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">this.ngZone.runOutsideAngular(() =&gt; &#123;</span><br><span class="line">	   this._sub = Observable.timer(1000, 1000)</span><br><span class="line">       .subscribe(i =&gt; this.ngZone.run(() =&gt; &#123;</span><br><span class="line">          this.content = &quot;Loaded! &quot; + i;</span><br><span class="line">    &#125;));</span><br><span class="line"> &#125;);</span><br></pre></td></tr></table></figure></div></li>
+</ol>
+</div></div><div class="post-main post-comment"></div></article><link rel="stylesheet" type="text/css" href="/css/third-party/font-awesome/4.5.0/font-awesome.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcdn.net/ajax/libs/lato-font/3.0.0/css/lato-font.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcdn.net/ajax/libs/fancybox/2.1.5/jquery.fancybox.css"><script src="/js/third-party/jquery/2.0.3/jquery.min.js"></script><script src="/js/third-party/fancybox/2.1.5/jquery.fancybox.pack.js"></script><script>$(document).ready(function() {
+  $(".fancybox").fancybox();
+});
+</script></body></html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html><html lang="zh-cn"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content=" id=&quot;工作流程&quot;&gt;&lt;a href=&quot;#工作流程&quot; class=&quot;headerlink&quot; title=&quot;工作流程&quot;&gt;&lt;/a&gt;工作流程&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;解析器(parser):将JS代码解析成抽象语法树AST&lt;/li&gt;
+&lt;li&gt;解释器(Ignition):将抽象语法树(AST)解释成字节码(bytecode),同时可以解释执行字节码的能力&lt;/li&gt;
+&lt;li&gt;编译器(TurboFan):编译出高效的机器代码&lt;/li&gt;
+&lt;/ul&gt;
+&lt;br&gt;
+
+&lt;h3 id=&quot;V8的惰性解析和预解析&quot;&gt;&lt;a href=&quot;#V8的惰性解析和预解析&quot; class=&quot;headerlink&quot; title=&quot;V8的惰性解析和预解析&quot;&gt;&lt;/a&gt;V8的惰性解析和预解析&lt;/h3&gt;&lt;p&gt;V8的解析阶段会将源文本解析为抽象语法树,再交由解释器解释成字节码,事实上,解析前会经历一系列的操作;这个过程大根是先将&lt;b&gt;&lt;font color=&quot;red&quot;&gt;源文本(UTF-8、Latin1、ASCII)&lt;/font&gt;&lt;/b&gt;转为&lt;b&gt;&lt;font color=&quot;red&quot;&gt;UTF-16的字符流&lt;/font&gt;&lt;/b&gt;,&lt;b&gt;&lt;font color=&quot;red&quot;&gt;扫描器(Scanner)&lt;/font&gt;&lt;/b&gt;通过组合底层字符流中的连续字符来构&lt;b&gt;&lt;font color=&quot;red&quot;&gt;造这些标记&lt;/font&gt;&lt;/b&gt;。然后提供给解析器;"><link rel="stylesheet" type="text/css" href="/css/normalize.css"><link rel="stylesheet" type="text/css" href="/css/highlight.css"><link rel="stylesheet" type="text/css" href="/css/noise.css"><title>浅谈V8 | Mccc</title><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><meta name="generator" content="Hexo 7.3.0"></head><body><article class="wrapper"><div class="post-main"><div class="nav"><nav class="container"><a class="sidebar-nav-item active" href="/">Home</a><a class="sidebar-nav-item" href="/archives">Archives</a></nav><div class="container post-meta"><div class="post-tags"><a class="post-tag-noise-link" href="/tags/V8/" rel="tag">V8</a></div><div class="post-time">2021-12-08</div></div></div><div class="container post-header"><h1>浅谈V8</h1></div><div class="container post-toc"><details class="toc"><summary class="toc-accordion"></summary><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="toc-number">1.</span> <span class="toc-text">工作流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#V8%E7%9A%84%E6%83%B0%E6%80%A7%E8%A7%A3%E6%9E%90%E5%92%8C%E9%A2%84%E8%A7%A3%E6%9E%90"><span class="toc-number">2.</span> <span class="toc-text">V8的惰性解析和预解析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#V8%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6"><span class="toc-number">3.</span> <span class="toc-text">V8垃圾回收机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#V8-%E5%AF%B9%E8%B1%A1"><span class="toc-number">4.</span> <span class="toc-text">V8-对象</span></a></li></ol></details></div><div class="container post-content"><h3 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h3><ul>
+<li>解析器(parser):将JS代码解析成抽象语法树AST</li>
+<li>解释器(Ignition):将抽象语法树(AST)解释成字节码(bytecode),同时可以解释执行字节码的能力</li>
+<li>编译器(TurboFan):编译出高效的机器代码</li>
+</ul>
+<br>
+
+<h3 id="V8的惰性解析和预解析"><a href="#V8的惰性解析和预解析" class="headerlink" title="V8的惰性解析和预解析"></a>V8的惰性解析和预解析</h3><p>V8的解析阶段会将源文本解析为抽象语法树,再交由解释器解释成字节码,事实上,解析前会经历一系列的操作;这个过程大根是先将<b><font color="red">源文本(UTF-8、Latin1、ASCII)</font></b>转为<b><font color="red">UTF-16的字符流</font></b>,<b><font color="red">扫描器(Scanner)</font></b>通过组合底层字符流中的连续字符来构<b><font color="red">造这些标记</font></b>。然后提供给解析器;</p>
+<p><b>1.惰性解析</b></p>
+<p>解析器在解析顶层代码过程中,如果遇到函数声明,不会跳过函数,而是对函数进行一次快速的预解析;仅生成顶层代码的AST和字节码;当然在这个过程中又引入了一个新的概念<code>预解析</code>,仅仅验证函数是否有语法上的错误,并且生成正确编译外部函数所需要的信息,当函数真正被调用的时候,才会完全解析并且按需编译;</p>
+<p><b>2. 预解析</b></p>
+<p>在预解析的过程中,最主要的工作就是确定函数内的变量是否被内部函数引用了;确定变量的分配方式;(对于顶层变量来说,都是在堆中分配的),也就是所谓的<code>闭包</code>;</p>
+<p><b><font color="red">注意:对于现在的V8引擎来说,具体到变量的内存分配是一个很复杂的过程,并不是所谓的基础类型存在于堆栈上,引用类型数据存在于堆上;V8在针对内存分配上做了大量的优化,对应我们实际工作者来说,不需要过多关注于内存的分配方式,这对我们来说是不需要的</font></b></p>
+<br>
+
+<h3 id="V8垃圾回收机制"><a href="#V8垃圾回收机制" class="headerlink" title="V8垃圾回收机制"></a>V8垃圾回收机制</h3><p><b> 1. V8内存结构</b></p>
+<ul>
+<li>New Space(新生区)：大多数对象被分配在这里。新生区是一个很小的区域，垃圾回收(Scavenger)在这个区域非常频繁，与其他区域相独立。新生区会被等分成两个区域（Semi Space），我们分别称这两个区域为 <code>From</code> 和 <code>To</code></li>
+<li>Old Space(老生区)：老生区用来存储常驻与内存空间的数据。新生区的对象在经过两次 Scavenger（新生区的 GC 算法）后，如果识别到它还是活动对象，那么这些对象会被移动到老生区。老生区有自己的一个 GC 策略，称为 Mark-Sweep-Compact<ul>
+<li>Old pointer space：对其他对象有引用的对象。</li>
+<li>Old data space：对其他对象没有引用的对象。</li>
+</ul>
+</li>
+<li>Large object space：这里存放体积超越其他区大小的对象。每个对象有自己mmap产生的内存。垃圾回收器从不移动大对象</li>
+<li>Code space(代码区)：代码对象，也就是包含JIT之后指令的对象，会被分配到这里</li>
+<li>Cell区、属性Cell区、Map区：这些区域存放Cell、属性Cell和Map，每个区域因为都是存放相同大小的元素，因此内存结构很简单</li>
+</ul>
+<p><b> 2. Scavenger</b> </p>
+<p>Scavenger是V8中专门处理新生区的堆内存空间,新对象默认会在新生区的From空间申请内存,新生区的内存分配非常容易,只保有一个指向内存区的指针,不断根据对象的大小对其进行递增;当指针到达新空间末尾(From空间不足时);Scavenger开始工作,将活动对象移动至To空间,清空From空间,并和To空间互换身份.重复两次这样的过程,依然存活的对象会移动到<code>老生区</code>,这个过程发生的很快,对于JS来说影响很小</p>
+<p><b> 3. Mark-Sweep-Compact</b></p>
+<p>标记清除算法,老生区的内存回收算法;采用深度遍历Roots,通过标记、清除、压缩来优化内存;具体原理相关文章很多,不过多介绍;</p>
+<br>
+
+
+<h3 id="V8-对象"><a href="#V8-对象" class="headerlink" title="V8-对象"></a>V8-对象</h3><p>V8在处理JS的对象时,针对不同的key值,将它们分为了两类<code>数组索引属性</code>和<code>命名属性</code>;遍历时优先遍历前者,在底层存储时分别存在不同的数据结构内,分别用<code>elements</code>和<code>properties</code>两个指针指向它们;</p>
+<div class="noise-code-block" style="--code-block-max-height:inherit;"><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;a:&quot;for&quot;,b:&quot;bar&quot;&#125;; //&quot;a&quot;和&quot;b&quot;为命名属性</span><br><span class="line"></span><br><span class="line">&#123;0:&quot;for&quot;,1:&quot;bar&quot;&#125;;  //0,1数组索引属性</span><br><span class="line">[&quot;for&quot;,&quot;bar&quot;];     //0,1数组索引属性</span><br></pre></td></tr></table></figure></div>
+
+<br>
+
+
+<p><b> 1. HiddenClasses和DescriptorArrays</b></p>
+<p>每个对象都有一个关联的HiddenClass,里面存储有关对象的信息,以及从属性名称到属性索引的映射;对象的<code>第一个字段</code>指向HiddenClass,HiddenClass随着对象的变化动态更新;</p>
+<p>在属性方面,最重要的信息是第三位字段,它存储了属性的数量,以及一个指针到描述符数组。描述符数组包含有关命名属性的信息,例如名称本身和存储值的位置</p>
+<ul>
+<li>具有相同结构（相同顺序的相同属性）的对象具有相同的 HiddenClass</li>
+<li>默认情况下，添加的每个新命名属性都会导致创建一个新的 HiddenClass</li>
+<li>添加整数索引属性不会创建新的 HiddenClasses</li>
+</ul>
+<p>对象共有三种不同的命名属性:</p>
+<ol>
+<li>对象内属性</li>
+<li>快属性</li>
+<li>慢属性</li>
+</ol>
+<p><strong>对象内属性</strong>:对象在创建的时候会初始化一定大小的空间,当对象内的属性没有超过这个大小时,这么属性会直接存储在对象本身上,可以快速访问;以这些方式存在的属性叫做<code>对象内属性</code></p>
+<p><strong>快属性</strong>:<a target="_blank" rel="noopener" href="https://www.geeksforgeeks.org/difference-between-linear-and-non-linear-data-structures/">线性数据结构</a>的读取速度更快,因此将存储在线性结构中的属性成为快属性</p>
+<p><strong>慢属性</strong>:存在于自包含的属性字典中，元信息不再通过 HiddenClass 共享;慢属性允许有效的属性删除和添加,但访问速度比其他两种类型慢;倘若一个对象频繁地增删属性,V8将这些本来会存储在线性结构中的快属性降级为慢属性</p>
+<p><b> 2. 快慢数组</b></p>
+<ol>
+<li>快数组是一种<code>线性的存储方式</code>，内部存储是连续的内存（新创建的空数组，默认的存储方式是快数组）；</li>
+<li><code>快数组长度是可变的</code>，可以根据元素的增加和删除来动态调整存储空间大小，内部是通过扩容和收缩机制实现</li>
+<li>字典模式(慢数组)创建了一个字典(HashTable)来记录映射关系，其中索引的整数值即是字典的键</li>
+</ol>
+<p><b> 2. 快慢数组转换</b></p>
+<ul>
+<li>如果快数组扩容后的容量是原来的9倍以上,意味着它比HashTable形式存储占用更大的内存,快数组会转换为慢数组</li>
+<li>如果快数组新增的索引与原来最大索引的差值大于1024,快数组会被转换会慢数组</li>
+<li>当慢数组转换成快数组能节省不少于50%的空间时,才会将其转换</li>
+</ul>
+<hr>
+<p>参考文章:</p>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://z3rog.tech/blog/2020/fast-properties.html#%E5%AF%B9%E8%B1%A1">https://z3rog.tech/blog/2020/fast-properties.html#%E5%AF%B9%E8%B1%A1</a></li>
+<li><a target="_blank" rel="noopener" href="https://v8.dev/blog/trash-talk">https://v8.dev/blog/trash-talk</a></li>
+<li><a target="_blank" rel="noopener" href="https://benediktmeurer.de/2017/12/13/an-introduction-to-speculative-optimization-in-v8/">https://benediktmeurer.de/2017/12/13/an-introduction-to-speculative-optimization-in-v8/</a></li>
+<li><a target="_blank" rel="noopener" href="https://v8.dev/blog/preparser#fn1">https://v8.dev/blog/preparser#fn1</a></li>
+</ol>
+</div></div><div class="post-main post-comment"></div></article><link rel="stylesheet" type="text/css" href="/css/third-party/font-awesome/4.5.0/font-awesome.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcdn.net/ajax/libs/lato-font/3.0.0/css/lato-font.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcdn.net/ajax/libs/fancybox/2.1.5/jquery.fancybox.css"><script src="/js/third-party/jquery/2.0.3/jquery.min.js"></script><script src="/js/third-party/fancybox/2.1.5/jquery.fancybox.pack.js"></script><script>$(document).ready(function() {
+  $(".fancybox").fancybox();
+});
+</script></body></html>

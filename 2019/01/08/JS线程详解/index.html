@@ -1,0 +1,93 @@
+<!DOCTYPE html><html lang="zh-cn"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content="&lt;strong&gt;2021年11月更新&lt;/strong&gt;"><link rel="stylesheet" type="text/css" href="/css/normalize.css"><link rel="stylesheet" type="text/css" href="/css/highlight.css"><link rel="stylesheet" type="text/css" href="/css/noise.css"><title>JavaScript Event Loop | Mccc</title><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><meta name="generator" content="Hexo 7.3.0"></head><body><article class="wrapper"><div class="post-main"><div class="nav"><nav class="container"><a class="sidebar-nav-item active" href="/">Home</a><a class="sidebar-nav-item" href="/archives">Archives</a></nav><div class="container post-meta"><div class="post-tags"><a class="post-tag-noise-link" href="/tags/JavaScript/" rel="tag">JavaScript</a></div><div class="post-time">2019-01-08</div></div></div><div class="container post-header"><h1>JavaScript Event Loop</h1></div><div class="container post-toc"><details class="toc"><summary class="toc-accordion"></summary><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%8F%E8%A7%88%E5%99%A8%E8%BF%9B%E7%A8%8B"><span class="toc-number">1.</span> <span class="toc-text">浏览器进程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8B%E4%BB%B6%E5%BE%AA%E7%8E%AF-Event-Loop"><span class="toc-number">2.</span> <span class="toc-text">事件循环(Event Loop)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A6%82%E6%8B%AC"><span class="toc-number">2.1.</span> <span class="toc-text">概括</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%BB%E5%8A%A1"><span class="toc-number">2.2.</span> <span class="toc-text">任务</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BE%AE%E4%BB%BB%E5%8A%A1"><span class="toc-number">2.3.</span> <span class="toc-text">微任务</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">2.4.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">2.5.</span> <span class="toc-text">总结</span></a></li></ol></li></ol></details></div><div class="container post-content"><p><strong>2021年11月更新</strong></p>
+<h3 id="浏览器进程"><a href="#浏览器进程" class="headerlink" title="浏览器进程"></a>浏览器进程</h3><p>以目前的多进程浏览器Chrome为例</p>
+<ol>
+<li>浏览器进程(Browser进程)</li>
+<li>渲染器进程</li>
+<li>GPU进程</li>
+<li>网络进程</li>
+<li>插件进程</li>
+<li>缓存进程</li>
+</ol>
+<p>其中渲染进程(Renderer)包含以下线程</p>
+<ol>
+<li>主线程</li>
+<li>合成器线程(Compositor)</li>
+<li>光栅线程(Raster)</li>
+<li>工作线程(Worker)</li>
+</ol>
+<br>
+
+<p>渲染进程在运行JS代码时,JS的引擎会维护一组代理,每个代理由一组执行上下文、执行上下文堆栈、一个主线程、一组用于处理工作线程的附加线程、一个<code>任务队列</code>和一个<code>微任务队列</code>组成;除了主线程之外,代理的每个组件对于该代理都是唯一的.</p>
+<br>
+
+
+<h3 id="事件循环-Event-Loop"><a href="#事件循环-Event-Loop" class="headerlink" title="事件循环(Event Loop)"></a>事件循环(Event Loop)</h3><h4 id="概括"><a href="#概括" class="headerlink" title="概括"></a>概括</h4><p>每个代理都有一个事件驱循环驱动,用来收集任何用户和其他事件,将任务排入队列以处理每个回调。然后它运行任何挂起的 JavaScript 任务，然后是任何挂起的微任务，然后执行任何需要的渲染和绘制，然后再次循环以检查挂起的任务;</p>
+<p>事件循环分为三种类型:<code>窗口事件循环(Window event loop)</code>、<code>工人事件循环(Worker event loop)</code>、<code>Worklet事件循环(Worklet event loop)</code></p>
+<p>这个过程中大概的步骤为:</p>
+<ol>
+<li>出列并运行任务列队中最早的任务或上一轮入列的任务</li>
+<li>执行所有的微任务</li>
+</ol>
+<ul>
+<li>当微任务不为空</li>
+<li>出列并运行最早的微任务</li>
+</ul>
+<ol start="3">
+<li>渲染更改</li>
+<li>重复步骤1</li>
+</ol>
+<h4 id="任务"><a href="#任务" class="headerlink" title="任务"></a>任务</h4><p>一个任务就是由执行诸如从头执行一段程序、执行一个事件回调或一个 interval&#x2F;timeout 被触发之类的标准机制而被调度的任意 JavaScript 代码。这些都在 任务队列（task queue）上被调度</p>
+<ul>
+<li><font color=#FF0000><code>script</code></font> （主代码块）</li>
+<li><font color=#FF0000><code>setTimeout</code></font> </li>
+<li><font color=#FF0000><code>setInterval</code></font> </li>
+<li><font color=#FF0000><code>setImmediate</code></font> - </li>
+<li>I&#x2F;O 、UI rendering</li>
+</ul>
+<h4 id="微任务"><a href="#微任务" class="headerlink" title="微任务"></a>微任务</h4><p>与任务最大的区别在于他们将会在一个任务退出并且执行上下文为空时,一次执行微任务列队里的所有任务</p>
+<ul>
+<li><font color=#FF0000><code>process.nextTick</code></font>（Nodejs）</li>
+<li><font color=#FF0000><code>promise</code></font> </li>
+<li><font color=#FF0000><code>Object.observe</code></font> </li>
+<li><font color=#FF0000><code>MutationObserver</code></font></li>
+</ul>
+<h4 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h4><p>  <em><strong>需要注意的是在执行来自任务列队中的任务时,在每一次新的事件循环开始迭代的时候都会执行列队里的每个任务,但是在执行过程中<code>新加入</code>到列队里的任务都要在<code>下一次迭代</code>开始之后才会执行,不同的是在这个程中<code>微任务</code>则会在一个<code>任务退出且执行上下文为空</code>的时候<code>立即执行</code>,意思是微任务会在下一个任务开始前且当前的事件循环结束之前执行所有的微任务(类似插队)</strong></em></p>
+<div class="noise-code-block" style="--code-block-max-height:inherit;"><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;</span><br><span class="line">  console.log(1)</span><br><span class="line"></span><br><span class="line">  Promise.resolve().then(() =&gt; &#123;</span><br><span class="line">    console.log(2)</span><br><span class="line">  &#125;)</span><br><span class="line"></span><br><span class="line">  setTimeout(() =&gt; &#123;</span><br><span class="line">    console.log(3)</span><br><span class="line"></span><br><span class="line">    Promise.resolve().then(() =&gt; &#123;</span><br><span class="line">      console.log(&#x27;new Promise&#x27;)</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">    setTimeout(() =&gt; &#123;</span><br><span class="line">      console.log(&#x27;new setTimeout&#x27;)</span><br><span class="line">    &#125;)</span><br><span class="line">    </span><br><span class="line">    ocnsole.log(4)</span><br><span class="line">  &#125;, 10);</span><br><span class="line">&lt;/script&gt;</span><br><span class="line"></span><br><span class="line">&lt;script&gt;</span><br><span class="line">  console.log(5)</span><br><span class="line"></span><br><span class="line">  setTimeout(() =&gt; &#123;</span><br><span class="line">    console.log(6)</span><br><span class="line">  &#125;)</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure></div>
+<p>上面的代码最终的打印结果是</p>
+<div class="noise-code-block" style="--code-block-max-height:inherit;"><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">new Promise</span><br><span class="line">new setTimeout</span><br></pre></td></tr></table></figure></div>
+
+<ol>
+<li><p>事件循环开始时,两个<code>&lt;script&gt;</code>任务存在于任务列队里,开始第一轮的迭代,首先执行第一个任务<code>&lt;script&gt;</code>内的代码,<font color=#FF0000><code>console.log(1)</code></font>压入调用栈执行并出栈;将<code>Promise.resolve()</code>压入调用栈执行并出栈,同时将Promise的回调函数加入<code>微任务列队</code>;<code>setTimeout()</code>压入调用栈执行并出栈,同时创建一个回调函数的<code>任务(Tasks)</code>加入<code>任务列队</code>用于下一次迭代;第一个<code>&lt;script&gt;</code>任务结束</p>
+</li>
+<li><p>此时调用栈为空,开始执行微任务列队中的所有任务,执行<font color=#FF0000><code>console.log(2)</code></font>;直到微任务列队为空;</p>
+</li>
+<li><p>开始执行第二个任务<code>&lt;script&gt;</code>内的代码,<font color=#FF0000><code>console.log(5)</code></font>进入调用栈执行并出栈;<code>setTimeout()</code>压入调用栈执行并出栈,同时创建一个回调函数的<code>任务(Tasks)</code>加入<code>任务列队</code>用于下一个迭代循环执行,第二个任务结束;此时微任务列队为空,第一轮任务结束.</p>
+</li>
+<li><p>此时任务列队里有第一轮过程中生成的两个<code>setTimeout()</code>回调任务,第一个<code>setTimeout()</code>回调任务将在<code>10毫秒</code>后执行,第二个<code>setTimeout()</code>回调任务将在<code>0毫秒</code>后执行,所以此时将优先执行第二个<code>setTimeout()</code>回调任务;</p>
+</li>
+<li><p>执行第二个<code>setTimeout()</code>回调任务, <font color=#FF0000><code>console.log(6)</code></font>压入调用栈执行并出栈;结束任务,此时微任务列队为空,开始执行下一个任务</p>
+</li>
+<li><p>执行第一个<code>setTimeout()</code>回调任务, <font color=#FF0000><code>console.log(3)</code></font>压入调用栈执行并出栈,将<code>Promise.resolve()</code>压入调用栈执行并出栈,同时将Promise的回调函数加入<code>微任务列队</code>;之后执行<code>setTimeout()</code>并将回调函数加入到<code>任务列队</code>用于下一个迭代的执行;最后<font color=#FF0000><code>console.log(4)</code></font>进入调用栈执行并出栈;任务结束</p>
+</li>
+<li><p>此时调用栈为空,开始执行微任务列队中的所有任务,执行<font color=#FF0000><code>console.log(new Promise)</code></font>;直到微任务列队为空;第二轮任务结束.</p>
+</li>
+<li><p>此时任务列队里有第二轮过程中生成的一个<code>setTimeout()</code>回调任务,<font color=#FF0000><code>console.log(&#39;new setTimeout&#39;)</code></font>压入调用栈执行并出栈,结束任务;此时微任务列队为空,任务列队为空;</p>
+</li>
+<li><p>所有任务执行完毕</p>
+</li>
+</ol>
+<br/>
+
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><ol>
+<li>事件循环开始时,第一轮的任务包含所有的<code>&lt;script&gt;</code>内的代码,一个<code>&lt;script&gt;</code>代表一个任务;</li>
+<li>当前循环内创建的微任务,会在每一个任务结束后清空.当前循环内创建的任务,会在下一个迭代(下一轮)执行;</li>
+<li>同一个循环内的<code>settimeout()</code>的回调任务根据参数时间确定执行顺序</li>
+<li>连续<code>Promise().then</code>的回调微任务执行顺序这个涉及到promise源码的问题,这里不过多讲解;会单独写一篇文章详解</li>
+</ol>
+<hr>
+<p>参考资料:</p>
+<p><a target="_blank" rel="noopener" href="https://developers.google.com/web/updates/2018/09/inside-browser-part3?hl=en">https://developers.google.com/web/updates/2018/09/inside-browser-part3?hl=en</a><br><a target="_blank" rel="noopener" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/EventLoop#event_loop">https://developer.mozilla.org/en-US/docs/Web/JavaScript/EventLoop#event_loop</a><br><a target="_blank" rel="noopener" href="https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide/In_depth">https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide/In_depth</a><br><a target="_blank" rel="noopener" href="https://developer.mozilla.org/zh-CN/docs/Web/API/HTML_DOM_API/Microtask_guide">https://developer.mozilla.org/zh-CN/docs/Web/API/HTML_DOM_API/Microtask_guide</a></p>
+</div></div><div class="post-main post-comment"></div></article><link rel="stylesheet" type="text/css" href="/css/third-party/font-awesome/4.5.0/font-awesome.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcdn.net/ajax/libs/lato-font/3.0.0/css/lato-font.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcdn.net/ajax/libs/fancybox/2.1.5/jquery.fancybox.css"><script src="/js/third-party/jquery/2.0.3/jquery.min.js"></script><script src="/js/third-party/fancybox/2.1.5/jquery.fancybox.pack.js"></script><script>$(document).ready(function() {
+  $(".fancybox").fancybox();
+});
+</script></body></html>
