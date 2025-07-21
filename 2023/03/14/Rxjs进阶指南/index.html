@@ -1,0 +1,121 @@
+<!DOCTYPE html><html lang="zh-cn"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content="Rxjs操作符"><link rel="stylesheet" type="text/css" href="/css/normalize.css"><link rel="stylesheet" type="text/css" href="/css/highlight.css"><link rel="stylesheet" type="text/css" href="/css/noise.css"><title>Rxjs操作符 | Mccc</title><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><meta name="generator" content="Hexo 7.3.0"></head><body><article class="wrapper"><div class="post-main"><div class="nav"><nav class="container"><a class="sidebar-nav-item active" href="/">Home</a><a class="sidebar-nav-item" href="/archives">Archives</a></nav><div class="container post-meta"><div class="post-tags"><a class="post-tag-noise-link" href="/tags/Rxjs/" rel="tag">Rxjs</a></div><div class="post-time">2023-03-14</div></div></div><div class="container post-header"><h1>Rxjs操作符</h1></div><div class="container post-toc"><details class="toc"><summary class="toc-accordion"></summary><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E6%93%8D%E4%BD%9C%E7%AC%A6"><span class="toc-number">1.</span> <span class="toc-text">创建操作符</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%81%94%E7%BB%93%E5%88%9B%E5%BB%BA%E6%93%8D%E4%BD%9C%E7%AC%A6"><span class="toc-number">2.</span> <span class="toc-text">联结创建操作符</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BD%AC%E6%8D%A2%E6%93%8D%E4%BD%9C%E7%AC%A6"><span class="toc-number">2.0.1.</span> <span class="toc-text">转换操作符</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%87%E6%BB%A4%E6%93%8D%E4%BD%9C%E7%AC%A6"><span class="toc-number">3.</span> <span class="toc-text">过滤操作符</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%9A%E6%92%AD%E6%93%8D%E4%BD%9C%E7%AC%A6"><span class="toc-number">4.</span> <span class="toc-text">多播操作符</span></a></li></ol></details></div><div class="container post-content"><p>Rxjs操作符</p>
+<h2 id="创建操作符"><a href="#创建操作符" class="headerlink" title="创建操作符"></a>创建操作符</h2><ol>
+<li>defer(订阅时通过工厂函数创建Observable)   </li>
+<li>form(创建一个Array、类数组对象、Promise、可迭代对象的Observable)</li>
+<li>formEvent(从 DOM 事件或 Node.js EventEmitter 事件或其它事件创建一个 Observable)</li>
+<li>interval(计时器)</li>
+<li>of</li>
+<li>range(创建一个发送指定长度递增的连续整数)</li>
+<li>timer(定时器&#x2F;计时器)</li>
+<li>iif(返回一个布尔值,从两个Observable中选择一个)</li>
+</ol>
+<br>
+
+<h2 id="联结创建操作符"><a href="#联结创建操作符" class="headerlink" title="联结创建操作符"></a>联结创建操作符</h2><ol>
+<li>combineLatest(订阅内部所有的Observable,每个Observable都至少发送一个值后,外部Observable才发送值的集合,直到内部所有的Observable都完成)</li>
+<li>zip(订阅内部所有的Observable,每个Observable都至少发送一个值后,外部Observable才发送值的集合,直到内部任意一个Observable完成,则外部Observable完成)</li>
+</ol>
+<div class="noise-code-block" style="--code-block-max-height:inherit;"><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">相同点:</span><br><span class="line">1. 内部的每个Observable至少发送一个值才输出外部的Observable,否则不输出任何值</span><br><span class="line"></span><br><span class="line">区别:</span><br><span class="line">1.combineLatest:内部所有的Observabale都完成,外部的Observable才完成</span><br><span class="line">2.zip:只要一个内部的Observable完成,则外部的Observable完成</span><br><span class="line"></span><br></pre></td></tr></table></figure></div>
+<hr>
+<ol start="3">
+<li>forkJoin(订阅内部所有的Observable,内部所有的Observable都完成后统一发出最新值的集合)</li>
+</ol>
+<hr>
+<ol start="4">
+<li>concat(订阅内部所有的Observable.顺序输出内部Observable的每个值,前一个Observable完成后才会开始输出下一个Observable)</li>
+<li>merge(订阅内部所有的Observable,内部任意一个Observable发送值则外部就同步发送值,内部所有的Observable完成后,外部Observable才完成)</li>
+</ol>
+<div class="noise-code-block" style="--code-block-max-height:inherit;"><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">相同点:</span><br><span class="line">1.输出单一值</span><br></pre></td></tr></table></figure></div>
+<hr>
+<ol start="6">
+<li>partition(类似filter,返回两个Observable,一个符合条件的Observable,另一个不符合条件的Observable)</li>
+<li>race(使用首个发出值的Observable)</li>
+</ol>
+<br>
+
+<h4 id="转换操作符"><a href="#转换操作符" class="headerlink" title="转换操作符"></a>转换操作符</h4><ol>
+<li>concatMap(将源Observable的每个值映射为一个新的Observable,只有前一个值对应的Observable完成后才会开始订阅下一个值的Observable,串行处理。)</li>
+<li>concatMapTo(与concatMap功能类似,但是会将源Observable的值输出为固定值)</li>
+</ol>
+<div class="noise-code-block" style="--code-block-max-height:inherit;"><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">注意:如果源数据的会无穷的输出值并且比project的速度要快,就会使外部源的值积压在内存区等待订阅,因此会产生内存问题</span><br></pre></td></tr></table></figure></div>
+<ol start="3">
+<li>mergeMap(将源Observable的每个值映射为一个新的Observable,与concanMap的区别是,内部的所有Observable会同时开始订阅，并发处理。)</li>
+<li>mergeMapTo</li>
+</ol>
+<div class="noise-code-block" style="--code-block-max-height:inherit;"><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">注意:如果不限制并发数量，会导致大量的Observable并发处理，会有内存泄露风险</span><br></pre></td></tr></table></figure></div>
+<ol start="5">
+<li>switchMap(将源Observable的每个值映射为一个新的Observable,当下一个Observable开始时会取消前一个Observable)</li>
+<li>exhaustMap(将源Observablede值,按照project的规则进行输出,若当前值还没有输出完毕,新到达的值会被忽略掉)</li>
+</ol>
+<div class="noise-code-block" style="--code-block-max-height:inherit;"><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">concatMap,mergeMap,switchMap,exhaustMap务必区分它们不同的用法</span><br><span class="line"></span><br><span class="line">concatMap:前一个值的Observable完成后才会开始下一个,顺序输出这些Observable(有序的),一些极端情况下会积压待订阅的Observable,会存在内存问题</span><br><span class="line">mergeMap:同时订阅值对应的所有Observable并且输出,内部会维护很多Observable所以会有内存泄露的问题</span><br><span class="line">switchMap:当新的值抵达时,会取消当前活跃的Observable并订阅新的Observable</span><br><span class="line">exhaustMap:当前Observable未完成前会忽略新抵达值的Observable</span><br></pre></td></tr></table></figure></div>
+<hr>
+<ol start="7">
+<li>expand(将源Observable的值,递归调用project函数)</li>
+<li>pairwise(将当前值和先前值放在一起作成一个数组，并发送它.只有再第二个值时才开始发送,因为第一个值没有前一个值)</li>
+<li>pluck(将每个源值映射到其指定的嵌套属性)</li>
+<li>groupBy</li>
+</ol>
+<hr>
+<ol start="11">
+<li>scan(与reduce 函数类似)</li>
+<li>switchScan</li>
+<li>mergeScan</li>
+</ol>
+<hr>
+<ol start="14">
+<li>map(与Array.prototype.map 函数类似,映射每一个值)</li>
+<li>mapTo(与Array.prototype.map 函数类似,映射每一个值至常量)</li>
+</ol>
+<br>
+
+<h2 id="过滤操作符"><a href="#过滤操作符" class="headerlink" title="过滤操作符"></a>过滤操作符</h2><ol>
+<li>auditTime(在 duration 毫秒内忽略源值，然后从源 Observable 发送最新值)</li>
+<li>debounceTime(舍弃掉两次输入之间小于指定时间的值,用于防抖)</li>
+<li>throttleTime(忽略指定之间内的值,用于节流)</li>
+</ol>
+<hr>
+<ol start="4">
+<li>distince(发送订阅的Observable中没有的值)</li>
+<li>distinctUntilChanged(发送订阅的Observable与前一个值不相等的值,使用&#x3D;&#x3D;&#x3D;)</li>
+<li>distinctUntilKeyChanged(根据键值比较与前一个值是否相等,并返回)</li>
+</ol>
+<hr>
+<ol start="7">
+<li>take(只发送源Observable的N个值)</li>
+<li>takeLast(源Observable完成,然后取最后N个值,源Observable完成时生效)</li>
+<li>takeWhile(源Observable的值不满足条件时,完成源Observable,注意区分filter)</li>
+<li>takeUntil(当提供的Observable发出值时,完成源Observable)</li>
+</ol>
+<hr>
+<ol start="11">
+<li>skip(跳过开头的值)</li>
+<li>skipLast(源Observable完成前跳过最后指定数量的值,源Observable完成时生效)</li>
+<li>skipUntil(跳过源Observable的值,直到第二个Observable开始发送值)</li>
+<li>skipWhile(跳过源Observable的值,直到表达式为fals开始发送值)</li>
+</ol>
+<hr>
+<ol start="15">
+<li>first(发出第一个值或最近到达的值)</li>
+<li>last(发出最后一个值)</li>
+</ol>
+<hr>
+<ol start="17">
+<li>sample(每当提供的Observable发射值时,从源Observable中获取最近的值)</li>
+<li>sampleTime(周期性的从源Observable中获取最近的值,与sample类似)</li>
+</ol>
+<hr>
+<ol start="19">
+<li>elementAt(发送源 Observable 的发送序列中位于指定 index 处的单个值)</li>
+<li>single(发出源Observable中符合表达式的单一值)</li>
+<li>filter(与Array.prototype.filter 方法类似)</li>
+</ol>
+<br>
+
+<h2 id="多播操作符"><a href="#多播操作符" class="headerlink" title="多播操作符"></a>多播操作符</h2><ol>
+<li>share(多播,转为热的Observable)</li>
+<li>publish</li>
+</ol>
+</div></div><div class="post-main post-comment"></div></article><link rel="stylesheet" type="text/css" href="/css/third-party/font-awesome/4.5.0/font-awesome.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcdn.net/ajax/libs/lato-font/3.0.0/css/lato-font.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcdn.net/ajax/libs/fancybox/2.1.5/jquery.fancybox.css"><script src="/js/third-party/jquery/2.0.3/jquery.min.js"></script><script src="/js/third-party/fancybox/2.1.5/jquery.fancybox.pack.js"></script><script>$(document).ready(function() {
+  $(".fancybox").fancybox();
+});
+</script></body></html>
