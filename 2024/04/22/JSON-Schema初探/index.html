@@ -36,19 +36,7 @@
 
 <div class="noise-code-block" style="--code-block-max-height:inherit;"><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * 表单控件Schema(灵感来源于JSON Schema)</span><br><span class="line"> * if:根据当前表单值来确定是否执行then内的逻辑</span><br><span class="line"> * then:if验证成功后决定执行的逻辑</span><br><span class="line"> *   -required 必填</span><br><span class="line"> *   -visiable 显示</span><br><span class="line"> *   -hidden 隐藏</span><br><span class="line"> */</span><br><span class="line">interface FormSchema&lt;T&gt; &#123;</span><br><span class="line">  if: (value: T | undefined) =&gt; boolean;</span><br><span class="line">  then: () =&gt; FormValidation;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">interface FormValidation &#123;</span><br><span class="line">  /**</span><br><span class="line">   * 表单控件唯一key</span><br><span class="line">   * if验证成功后将对应key的表单修改为必填</span><br><span class="line">   */</span><br><span class="line">  required?: Array&lt;string&gt;;</span><br><span class="line">  /**</span><br><span class="line">   * 表单控件唯一key</span><br><span class="line">   * if验证成功后将对应key的表单修改为可见</span><br><span class="line">   */</span><br><span class="line">  visiable?: Array&lt;string&gt;;</span><br><span class="line">  /**</span><br><span class="line">   * 表单控件唯一key</span><br><span class="line">   * if验证成功后将对应key的表单修改为不可见</span><br><span class="line">   */</span><br><span class="line">  hidden?: Array&lt;string&gt;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure></div>
 <p>最终效果:<a target="_blank" rel="noopener" href="https://dev.criterion-editor.vosbyte.com/json-editor">https://dev.criterion-editor.vosbyte.com/json-editor</a></p>
-</div></div><div class="post-main post-comment"><div id="disqus_thread"></div><script type="text/javascript">
-var disqus_shortname = 'MCCC-1';
-var disqus_identifier = '2024/04/22/JSON-Schema初探/';
-var disqus_title = 'JSON Schema初探';
-var disqus_url = 'http://example.com/2024/04/22/JSON-Schema%E5%88%9D%E6%8E%A2/';
-(function() {
-   var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-   dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-   (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-})();
-</script>
-<noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a target="_blank" rel="noopener" href="http://disqus.com" class="dsq-brlink">Blog comments powered by <span class="logo-disqus">Disqus</span></a><div id="giscus_thread"></div><script src="https://giscus.app/client.js"
+</div></div><div class="post-main post-comment"><div id="giscus_thread"></div><script src="https://giscus.app/client.js"
         data-repo="angelise7/blog-comments"
         data-repo-id="R_kgDOPQr6lw"
         data-category=""

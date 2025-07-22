@@ -47,19 +47,7 @@
 <p>2.打开一个新的域名时,新的域名下没有getDataFromWeb这个方法,在某些情况下会报错无法找到这个方法,<br>如果改为在当前域名下添加#的方法来获取URL的改变来触发loadstop,在iOS下会触发loadstop方法,但是在Android下不会触发,所以这里只能打开一个新的域名并且通过?参数拼接的方法获取参数</p>
 <p>3.ThemeableBrowser插件由于长时间未更新,在iOS12下当打开web时loadstop监听会被iOS系统屏蔽掉,无法监听,所以无法用于返回参数</p>
 <p>4.所以总体来说,如果只是单纯的向web传递参数,可以考虑使用ThemeableBrowser来实现,如果需要web向APP内返回参数,只能只用InAppBrowser来解决<br>5.采用上述方法,存在一个安全问题就是返回的参数是通过地址栏拼接获得,实际项目中可以通过和服务器同时约定一个加密码来用于验证数据的真伪即可解决.</p>
-</div></div><div class="post-main post-comment"><div id="disqus_thread"></div><script type="text/javascript">
-var disqus_shortname = 'MCCC-1';
-var disqus_identifier = '2019/01/08/1/';
-var disqus_title = 'Ionic3使用InAppBrowser进行数据交互';
-var disqus_url = 'http://example.com/2019/01/08/1/';
-(function() {
-   var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-   dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-   (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-})();
-</script>
-<noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a target="_blank" rel="noopener" href="http://disqus.com" class="dsq-brlink">Blog comments powered by <span class="logo-disqus">Disqus</span></a><div id="giscus_thread"></div><script src="https://giscus.app/client.js"
+</div></div><div class="post-main post-comment"><div id="giscus_thread"></div><script src="https://giscus.app/client.js"
         data-repo="angelise7/blog-comments"
         data-repo-id="R_kgDOPQr6lw"
         data-category=""
