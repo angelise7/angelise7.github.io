@@ -47,16 +47,7 @@
 <p>2.打开一个新的域名时,新的域名下没有getDataFromWeb这个方法,在某些情况下会报错无法找到这个方法,<br>如果改为在当前域名下添加#的方法来获取URL的改变来触发loadstop,在iOS下会触发loadstop方法,但是在Android下不会触发,所以这里只能打开一个新的域名并且通过?参数拼接的方法获取参数</p>
 <p>3.ThemeableBrowser插件由于长时间未更新,在iOS12下当打开web时loadstop监听会被iOS系统屏蔽掉,无法监听,所以无法用于返回参数</p>
 <p>4.所以总体来说,如果只是单纯的向web传递参数,可以考虑使用ThemeableBrowser来实现,如果需要web向APP内返回参数,只能只用InAppBrowser来解决<br>5.采用上述方法,存在一个安全问题就是返回的参数是通过地址栏拼接获得,实际项目中可以通过和服务器同时约定一个加密码来用于验证数据的真伪即可解决.</p>
-
-<div id="gitalk-container"></div>
-<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
-
-		<script>
-		var gitalkConfig = {"clientID":"Ov23li8ntBo0XKvstJme","clientSecret":"b0fc92ee81f6ee3e9e1e447c6c1f0715d3732681","repo":"hexo-plugin-gitalk","owner":"angelise7","admin":["angelise7"],"distractionFreeMode":false};
-	    gitalkConfig.id = md5(location.pathname);
-		var gitalk = new Gitalk(gitalkConfig);
-	    gitalk.render("gitalk-container");
-	    </script></div></div><div class="post-main post-comment"></div></article><link rel="stylesheet" type="text/css" href="/css/third-party/font-awesome/4.5.0/font-awesome.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcdn.net/ajax/libs/lato-font/3.0.0/css/lato-font.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcdn.net/ajax/libs/fancybox/2.1.5/jquery.fancybox.css"><script src="/js/third-party/jquery/2.0.3/jquery.min.js"></script><script src="/js/third-party/fancybox/2.1.5/jquery.fancybox.pack.js"></script><script>$(document).ready(function() {
+</div></div><div class="post-main post-comment"></div></article><link rel="stylesheet" type="text/css" href="/css/third-party/font-awesome/4.5.0/font-awesome.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcdn.net/ajax/libs/lato-font/3.0.0/css/lato-font.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcdn.net/ajax/libs/fancybox/2.1.5/jquery.fancybox.css"><script src="/js/third-party/jquery/2.0.3/jquery.min.js"></script><script src="/js/third-party/fancybox/2.1.5/jquery.fancybox.pack.js"></script><script>$(document).ready(function() {
   $(".fancybox").fancybox();
 });
 </script></body></html>
